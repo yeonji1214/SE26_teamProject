@@ -1,15 +1,17 @@
 package its.ui.gui.panel;
 
+import its.ui.gui.common.UIConstants;
+import its.ui.gui.common.PlaceholderTextField;
+import its.ui.gui.common.PlaceholderPasswordField;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class LoginPanel extends BasePanel{
     // UI Components
-    private JTextField usernameField;
-    private JPasswordField passwordField;
+    private PlaceholderTextField usernameField;
+    private PlaceholderPasswordField passwordField;
     private JButton loginButton;
+    private LoginListener loginListener;
 
     @Override
     protected void setupLayout() {
@@ -18,42 +20,44 @@ public class LoginPanel extends BasePanel{
 
     @Override
     protected void initComponents() {
+        JPanel formPanel = createFormPanel();
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        add(formPanel, gbc);
+
+        SwingUtilities.invokeLater(() -> this.requestFocusInWindow());
+    }
+
+    private JPanel createFormPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(new Color(200, 200, 200));
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Title
-        JLabel titleLabel = createTitleLabel("Issue Tracking System");
+        usernameField = new PlaceholderTextField("id", 15);
+        usernameField.setPreferredSize(UIConstants.INPUT_FIELD_SIZE);
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        add(titleLabel, gbc);
+        panel.add(usernameField, gbc);
 
-        // Username
-        gbc.gridwidth = 1;
-        gbc.gridx = 0;
+        passwordField = new PlaceholderPasswordField("pw", 15);
+        passwordField.setPreferredSize(UIConstants.INPUT_FIELD_SIZE);
         gbc.gridy = 1;
-        add(new JLabel("Username:"), gbc);
+        panel.add(passwordField, gbc);
 
-        usernameField = new JTextField(20);
+        loginButton = createStyledButton("login");
         gbc.gridx = 1;
-        add(usernameField, gbc);
+        gbc.gridy = 0;
+        gbc.gridheight = 2;
+        gbc.fill = GridBagConstraints.BOTH;
+        panel.add(loginButton, gbc);
 
-        //Password
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        add(new JLabel("Password:"), gbc);
-
-        passwordField = new JPasswordField(20);
-        gbc.gridx = 1;
-        add(passwordField, gbc);
-
-        //Login Button
-        loginButton = createStyledButton("Login");
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.gridwidth = 2;
-        add(loginButton, gbc);
+        return panel;
     }
 
     @Override
@@ -74,13 +78,26 @@ public class LoginPanel extends BasePanel{
             return;
         }
 
-        System.out.println("Login: " + username);
         // TODO: Service 호출
+
+        System.out.println("Login: " + username);
+
+        if (loginListener != null) {
+            loginListener.onLoginSuccess(username);
+        }
     }
 
     @Override
     public void clear(){
         usernameField.setText("");
         passwordField.setText("");
+    }
+
+    public void setLoginListener(LoginListener listener){
+        this.loginListener = listener;
+    }
+
+    public interface LoginListener {
+        void onLoginSuccess(String username);
     }
 }
