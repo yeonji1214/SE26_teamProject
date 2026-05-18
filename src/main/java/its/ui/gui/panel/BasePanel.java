@@ -1,6 +1,6 @@
 package its.ui.gui.panel;
 
-import its.ui.gui.util.UIConstants;
+import its.ui.gui.common.UIConstants;
 import javax.swing.*;
 import java.awt.*;
 
@@ -41,10 +41,37 @@ public abstract class BasePanel extends JPanel {
     }
 
     // Common util. methods
+    /*protected JButton createStyledButton(String text, Color backgroundColor) {
+        JButton button = new JButton(text);
+        button.setPreferredSize(UIConstants.BUTTON_SIZE);
+        button.setFont(UIConstants.BUTTON_FONT);
+        button.setBackground(backgroundColor);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setOpaque(true);
+        button.setBorderPainted(false);
+
+        Color hoverColor = backgroundColor.darker();
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(hoverColor);
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(backgroundColor);
+            }
+        });
+
+        return button;
+    }*/
+
     protected JButton createStyledButton(String text) {
         JButton button = new JButton(text);
         button.setPreferredSize(UIConstants.BUTTON_SIZE);
         button.setFont(UIConstants.BUTTON_FONT);
+
         return button;
     }
 
