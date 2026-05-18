@@ -1,5 +1,7 @@
 package its.ui.gui;
 
+import its.ui.gui.panel.LoginPanel;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -15,5 +17,8 @@ public class MainFrame extends JFrame {
         initComponents();
     }
 
-    private void initComponents() {}
+    private void initComponents() {
+        LoginPanel loginPanel = new LoginPanel();
+        add(loginPanel, BorderLayout.CENTER);
+    }
 }
