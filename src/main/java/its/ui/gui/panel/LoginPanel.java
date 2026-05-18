@@ -57,6 +57,8 @@ public class LoginPanel extends BasePanel{
         gbc.fill = GridBagConstraints.BOTH;
         panel.add(loginButton, gbc);
 
+        setTabOrder(panel, usernameField, passwordField, loginButton);
+
         return panel;
     }
 

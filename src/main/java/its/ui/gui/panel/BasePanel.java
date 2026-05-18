@@ -40,33 +40,6 @@ public abstract class BasePanel extends JPanel {
         // Basically do nothing
     }
 
-    // Common util. methods
-    /*protected JButton createStyledButton(String text, Color backgroundColor) {
-        JButton button = new JButton(text);
-        button.setPreferredSize(UIConstants.BUTTON_SIZE);
-        button.setFont(UIConstants.BUTTON_FONT);
-        button.setBackground(backgroundColor);
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setOpaque(true);
-        button.setBorderPainted(false);
-
-        Color hoverColor = backgroundColor.darker();
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(hoverColor);
-            }
-
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(backgroundColor);
-            }
-        });
-
-        return button;
-    }*/
-
     protected JButton createStyledButton(String text) {
         JButton button = new JButton(text);
         button.setPreferredSize(UIConstants.BUTTON_SIZE);
@@ -79,6 +52,52 @@ public abstract class BasePanel extends JPanel {
         JLabel label = new JLabel(text);
         label.setFont(UIConstants.TITLE_FONT);
         return label;
+    }
+
+    protected void setTabOrder(Container container, Component... components) {
+        FocusTraversalPolicy policy = new FocusTraversalPolicy() {
+            @Override
+            public Component getComponentAfter(Container aContainer, Component aComponent) {
+                for (int i = 0; i < components.length; i++) {
+                    if (components[i] == aComponent) {
+                        return i == components.length - 1
+                                ? components[0]
+                                : components[i + 1];
+                    }
+                }
+                return components[0];
+            }
+
+            @Override
+            public Component getComponentBefore(Container aContainer, Component aComponent) {
+                for (int i = 0; i < components.length; i++) {
+                    if (components[i] == aComponent) {
+                        return i == 0
+                                ? components[components.length - 1]
+                                : components[i - 1];
+                    }
+                }
+                return components[components.length - 1];
+            }
+
+            @Override
+            public Component getFirstComponent(Container aContainer) {
+                return components[0];
+            }
+
+            @Override
+            public Component getLastComponent(Container aContainer) {
+                return components[components.length - 1];
+            }
+
+            @Override
+            public Component getDefaultComponent(Container aContainer) {
+                return components[0];
+            }
+        };
+
+        container.setFocusTraversalPolicy(policy);
+        container.setFocusTraversalPolicyProvider(true);
     }
 
     /*
