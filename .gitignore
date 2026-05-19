@@ -66,3 +66,12 @@ bin/
 # JVM crash logs
 hs_err_pid*
 replay_pid*
+
+### React / Vite ###
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
