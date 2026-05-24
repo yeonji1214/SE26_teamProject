@@ -1,7 +1,10 @@
 function Header() {
   return (
     <header className="header">
-      <h1>IssueTracker</h1>
+      <div>
+        <h1>IssueTracker</h1>
+        <p>Java 기반 이슈 관리 시스템 Web UI</p>
+      </div>
     </header>
   );
 }
