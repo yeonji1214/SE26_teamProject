@@ -11,11 +11,12 @@ public class UIConstants {
 
     // Color constants
     public static final Color BACKGROUND_COLOR = Color.WHITE;
-    public static final Color PRIMARY_COLOR = new Color (103, 110, 159);
+    public static final Color PRIMARY_COLOR = new Color (36, 99, 235);
 
-    public static final Color NAVIGATION_COLOR = new Color (51, 51, 51);
+    public static final Color NAVIGATION_COLOR = new Color (16, 24, 39);
+    public static final Color NAVIGATION_HOVER_COLOR = new Color(25, 35, 55);
 
-    public static final Color PRIMARY_BUTTON_COLOR = new Color(103, 110, 159);
+    public static final Color PRIMARY_BUTTON_COLOR = new Color(36, 99, 235);
     public static final Color SECONDARY_BUTTON_COLOR = new Color(158, 158, 158); // Gray
     public static final Color DANGER_BUTTON_COLOR = new Color(244, 67, 54);    // Material Red
     public static final Color SUCCESS_BUTTON_COLOR = new Color(76, 175, 80);   // Material Green

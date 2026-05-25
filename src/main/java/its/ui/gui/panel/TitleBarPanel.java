@@ -41,7 +41,7 @@ public class TitleBarPanel extends JPanel {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(new Color(0, 0,0, 0));
 
-        usernameLabel = new JLabel("Welcome, " + (user != null ? user : ""));
+        usernameLabel = new JLabel("사용자: " + (user != null ? user : ""));
         usernameLabel.setFont(UIConstants.LABEL_FONT);
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -55,7 +55,7 @@ public class TitleBarPanel extends JPanel {
 
     public void setUsername(String username) {
         if (usernameLabel != null) {
-            usernameLabel.setText("Welcome, " + username);
+            usernameLabel.setText("사용자: " + username);
         }
     }
 }
