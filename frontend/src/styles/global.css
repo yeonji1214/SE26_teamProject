@@ -476,3 +476,118 @@ body {
     flex-direction: column;
   }
 }
+
+.issue-create-page {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(360px, 1fr) 1px 360px;
+  gap: 32px;
+  align-items: start;
+}
+
+.issue-create-main h2 {
+  margin: 0 0 24px;
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.issue-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.create-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.create-form-field span {
+  font-size: 13px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.create-form-field input,
+.create-form-field select,
+.create-form-field textarea {
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  padding: 0 14px;
+  background: #d9d9d9;
+  color: #111827;
+  outline: none;
+}
+
+.create-form-field input,
+.create-form-field select {
+  height: 42px;
+}
+
+.create-form-field textarea {
+  min-height: 130px;
+  padding-top: 12px;
+  resize: vertical;
+}
+
+.issue-create-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.issue-create-divider {
+  width: 1px;
+  min-height: 560px;
+  background: #c7c7c7;
+}
+
+.issue-create-side {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.issue-create-side-card {
+  min-height: 160px;
+  border-radius: 8px;
+  background: #d9d9d9;
+  overflow: hidden;
+}
+
+.issue-create-side-card h3 {
+  margin: 0;
+  padding: 14px 18px;
+  background: #c7c7c7;
+  font-size: 16px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.issue-create-side-card p,
+.issue-create-side-card ul {
+  margin: 0;
+  padding: 18px;
+  color: #374151;
+  line-height: 1.7;
+}
+
+.issue-create-side-card ul {
+  padding-left: 36px;
+}
+
+@media (max-width: 980px) {
+  .issue-create-page {
+    max-width: 100%;
+    grid-template-columns: 1fr;
+  }
+
+  .issue-create-divider {
+    display: none;
+  }
+}
