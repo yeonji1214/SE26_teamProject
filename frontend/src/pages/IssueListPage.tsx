@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import IssueFilterPanel from "../components/IssueFilterPanel";
 import IssueTable, { type IssueListRow } from "../components/IssueTable";
 import type { IssuePriority, IssueStatus } from "../types/issue";
 
@@ -110,92 +111,21 @@ function IssueListPage() {
         </button>
       </div>
 
-      <div className="issue-filter-panel">
-        <div className="filter-row">
-          <label className="filter-field">
-            <span>프로젝트</span>
-            <input
-              value={projectFilter}
-              onChange={(event) => setProjectFilter(event.target.value)}
-              placeholder="project1"
-            />
-          </label>
-
-          <label className="filter-field">
-            <span>상태</span>
-            <select
-              value={statusFilter}
-              onChange={(event) =>
-                setStatusFilter(event.target.value as IssueStatus | "")
-              }
-            >
-              <option value="">전체</option>
-              <option value="NEW">NEW</option>
-              <option value="ASSIGNED">ASSIGNED</option>
-              <option value="FIXED">FIXED</option>
-              <option value="RESOLVED">RESOLVED</option>
-              <option value="CLOSED">CLOSED</option>
-              <option value="REOPENED">REOPENED</option>
-            </select>
-          </label>
-
-          <label className="filter-field">
-            <span>리포터</span>
-            <input
-              value={reporterFilter}
-              onChange={(event) => setReporterFilter(event.target.value)}
-              placeholder="tester1"
-            />
-          </label>
-
-          <label className="filter-field">
-            <span>담당자</span>
-            <input
-              value={assigneeFilter}
-              onChange={(event) => setAssigneeFilter(event.target.value)}
-              placeholder="dev1"
-            />
-          </label>
-
-          <label className="filter-field">
-            <span>우선순위</span>
-            <select
-              value={priorityFilter}
-              onChange={(event) =>
-                setPriorityFilter(event.target.value as IssuePriority | "")
-              }
-            >
-              <option value="">전체</option>
-              <option value="BLOCKER">BLOCKER</option>
-              <option value="CRITICAL">CRITICAL</option>
-              <option value="MAJOR">MAJOR</option>
-              <option value="MINOR">MINOR</option>
-              <option value="TRIVIAL">TRIVIAL</option>
-            </select>
-          </label>
-        </div>
-
-        <div className="search-row">
-          <input
-            className="issue-search-input"
-            value={keyword}
-            onChange={(event) => setKeyword(event.target.value)}
-            placeholder="이슈 제목 검색"
-          />
-
-          <button type="button" className="primary-button">
-            검색
-          </button>
-
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={resetFilters}
-          >
-            초기화
-          </button>
-        </div>
-      </div>
+      <IssueFilterPanel
+        projectFilter={projectFilter}
+        statusFilter={statusFilter}
+        reporterFilter={reporterFilter}
+        assigneeFilter={assigneeFilter}
+        priorityFilter={priorityFilter}
+        keyword={keyword}
+        onProjectFilterChange={setProjectFilter}
+        onStatusFilterChange={setStatusFilter}
+        onReporterFilterChange={setReporterFilter}
+        onAssigneeFilterChange={setAssigneeFilter}
+        onPriorityFilterChange={setPriorityFilter}
+        onKeywordChange={setKeyword}
+        onReset={resetFilters}
+      />
 
       <IssueTable
         issues={filteredIssues}
