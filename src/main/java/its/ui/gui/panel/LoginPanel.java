@@ -82,7 +82,7 @@ public class LoginPanel extends BasePanel{
 
         // TODO: Service 호출
 
-        System.out.println("Login: " + username);
+        System.out.println("[LoginPanel] Login: " + username);
 
         if (loginListener != null) {
             loginListener.onLoginSuccess(username);

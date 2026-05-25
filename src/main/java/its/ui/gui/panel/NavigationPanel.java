@@ -17,10 +17,12 @@ public class NavigationPanel extends JPanel {
 
     private NavigationListener listener;
 
+    private JButton currentSelectedButton;
+
     public NavigationPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBackground(new Color(51, 51, 51));
-        setPreferredSize(new Dimension(200, 740));
+        setBackground(UIConstants.NAVIGATION_COLOR);
+        setPreferredSize(new Dimension(180, 740));
 
         projectsButton = createNavButton("Projects");
         issuesButton = createNavButton("Issues");
@@ -35,6 +37,8 @@ public class NavigationPanel extends JPanel {
         add(createIssueButton);
         add(statisticsButton);
         add(logoutButton);
+
+        selectButton(projectsButton);
     }
 
     private JButton createNavButton(String text) {
@@ -45,17 +49,21 @@ public class NavigationPanel extends JPanel {
         button.setFocusPainted(false);
         button.setBorderPainted(false);
         button.setFont(UIConstants.BUTTON_FONT);
-        button.setMaximumSize(new Dimension(200, 50));
+        button.setMaximumSize(new Dimension(180, 50));
 
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e){
-                button.setBackground(new Color(80, 80, 80));
+                if (button != currentSelectedButton) {
+                    button.setBackground(UIConstants.NAVIGATION_HOVER_COLOR);
+                }
             }
 
             @Override
             public void mouseExited(MouseEvent e){
-                button.setBackground(UIConstants.NAVIGATION_COLOR);
+                if (button != currentSelectedButton) {
+                    button.setBackground(UIConstants.NAVIGATION_COLOR);
+                }
             }
         });
 
@@ -72,14 +80,18 @@ public class NavigationPanel extends JPanel {
 
     private void attachListener(JButton button, String menuName) {
         button.addActionListener(e -> {
-            System.out.println("Button clicked: " + menuName);
+            System.out.println("[NavigationPanel] Button clicked: " + menuName);
+
+            if (menuName != NavigationListener.LOGOUT) {
+                selectButton(button);
+            }
 
             if (listener != null) {
-                System.out.println("Listener is set, calling onMenuSelected");
+                System.out.println("[NavigationPanel] Listener is set, calling onMenuSelected");
                 listener.onMenuSelected(menuName);
             }
             else {
-                System.out.println("Warning: Listener is null");
+                System.out.println("[NavigationPanel] Warning: Listener is null");
             }
         });
     }
@@ -94,5 +106,16 @@ public class NavigationPanel extends JPanel {
         String CREATE_ISSUES = "CREATE_ISSUE";
         String STATISTICS = "STATISTICS";
         String LOGOUT = "LOGOUT";
+    }
+
+    private void selectButton(JButton button) {
+        if (currentSelectedButton != null) {
+            currentSelectedButton.setBackground(UIConstants.NAVIGATION_COLOR);
+        }
+
+        currentSelectedButton = button;
+        if (currentSelectedButton != null) {
+            currentSelectedButton.setBackground(UIConstants.PRIMARY_BUTTON_COLOR);
+        }
     }
 }

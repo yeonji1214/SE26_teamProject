@@ -64,8 +64,8 @@ public class MainFrame extends JFrame {
     }
 
     private void showMainPanel() {
-        System.out.println("Switching to MAIN screen ...");
-        System.out.println("Current User: " + currentUser);
+        System.out.println("[MainFrame] Switching to MAIN screen ...");
+        System.out.println("[MainFrame] Current User: " + currentUser);
 
         if (titleBarPanel != null) {
             titleBarPanel.setUsername(currentUser);
@@ -82,7 +82,7 @@ public class MainFrame extends JFrame {
 
         navigationPanel = new NavigationPanel();
         navigationPanel.setNavigationListener(menuName -> {
-            System.out.println("Menu Selected: " + menuName);
+            System.out.println("[MainFrame] Menu Selected: " + menuName);
 
             if (menuName.equals("LOGOUT")) {
                 handleLogout();
