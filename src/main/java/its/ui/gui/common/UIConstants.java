@@ -6,11 +6,12 @@ public class UIConstants {
     // Font constants
     public static final Font TITLE_FONT = new Font("Arial", Font.BOLD, 20);
     public static final Font SUBTITLE_FONT = new Font("Arial", Font.BOLD, 18);
+    public static final Font HEADER_FONT = new Font("Arial", Font.BOLD, 14);
     public static final Font BUTTON_FONT = new Font("Arial", Font.PLAIN, 14);
     public static final Font LABEL_FONT = new Font("Arial", Font.PLAIN, 12);
 
     // Color constants
-    public static final Color BACKGROUND_COLOR = Color.WHITE;
+    public static final Color BACKGROUND_COLOR = new Color(240, 240, 240);
     public static final Color PRIMARY_COLOR = new Color (36, 99, 235);
 
     public static final Color NAVIGATION_COLOR = new Color (16, 24, 39);

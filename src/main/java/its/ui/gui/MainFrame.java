@@ -1,9 +1,7 @@
 package its.ui.gui;
 
 import its.ui.gui.common.UIConstants;
-import its.ui.gui.panel.LoginPanel;
-import its.ui.gui.panel.NavigationPanel;
-import its.ui.gui.panel.TitleBarPanel;
+import its.ui.gui.panel.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -59,8 +57,13 @@ public class MainFrame extends JFrame {
     }
 
     private void showLoginPanel() {
-        cardLayout.show(contentPanel, LOGIN_CARD);
         loginPanel.clear(); // Clear text fields
+
+        if (mainPanel != null) {
+            clearAllContentPanels();
+        }
+
+        cardLayout.show(contentPanel, LOGIN_CARD);
     }
 
     private void showMainPanel() {
@@ -96,7 +99,7 @@ public class MainFrame extends JFrame {
         contentCardLayout = new CardLayout();
         contentAreaPanel = new JPanel(contentCardLayout);
 
-        contentAreaPanel.add(createTempPanel("Projects"), PROJECTS_CARD);
+        contentAreaPanel.add(new ProjectsPanel(), PROJECTS_CARD);
         contentAreaPanel.add(createTempPanel("Issues"), ISSUES_CARD);
         contentAreaPanel.add(createTempPanel("Create Issue"), CREATE_ISSUE_CARD);
         contentAreaPanel.add(createTempPanel("Statistics"), STATISTICS_CARD);
@@ -130,5 +133,14 @@ public class MainFrame extends JFrame {
         panel.add(titleLabel, BorderLayout.CENTER);
 
         return panel;
+    }
+
+    private void clearAllContentPanels() {
+        Component[] components = contentAreaPanel.getComponents();
+        for (Component component : components) {
+            if (component instanceof BasePanel) {
+                ((BasePanel) component).clear();
+            }
+        }
     }
 }
