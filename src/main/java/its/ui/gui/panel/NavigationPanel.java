@@ -22,7 +22,7 @@ public class NavigationPanel extends JPanel {
     public NavigationPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(UIConstants.NAVIGATION_COLOR);
-        setPreferredSize(new Dimension(180, 740));
+        setPreferredSize(new Dimension(170, 740));
 
         projectsButton = createNavButton("Projects");
         issuesButton = createNavButton("Issues");
@@ -36,7 +36,12 @@ public class NavigationPanel extends JPanel {
         add(issuesButton);
         add(createIssueButton);
         add(statisticsButton);
+
+        add(Box.createVerticalGlue());
+
         add(logoutButton);
+
+        add(Box.createRigidArea(new Dimension(0, 20)));
 
         selectButton(projectsButton);
     }
@@ -49,7 +54,12 @@ public class NavigationPanel extends JPanel {
         button.setFocusPainted(false);
         button.setBorderPainted(false);
         button.setFont(UIConstants.BUTTON_FONT);
-        button.setMaximumSize(new Dimension(180, 50));
+        button.setPreferredSize(new Dimension(170, 50));
+        button.setMaximumSize(new Dimension(170, 50));
+
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+
+        button.setMargin(new Insets(0, 10, 0, 0));
 
         button.addMouseListener(new MouseAdapter() {
             @Override
