@@ -100,7 +100,20 @@ public class MainFrame extends JFrame {
         contentAreaPanel = new JPanel(contentCardLayout);
 
         contentAreaPanel.add(new ProjectsPanel(), PROJECTS_CARD);
-        contentAreaPanel.add(createTempPanel("Issues"), ISSUES_CARD);
+
+        IssuesPanel issuesPanel = new IssuesPanel();
+        issuesPanel.setIssueActionListener(new IssuesPanel.IssueActionListener() {
+            @Override
+            public void onCreateIssueRequested() {
+                contentCardLayout.show(contentAreaPanel, CREATE_ISSUE_CARD);
+            }
+
+            public void onIssueSelected(int issueId) {
+                // TODO: 이슈 상세 패널에 ID 전달 후 화면 전환
+            }
+        });
+
+        contentAreaPanel.add(issuesPanel, ISSUES_CARD);
         contentAreaPanel.add(createTempPanel("Create Issue"), CREATE_ISSUE_CARD);
         contentAreaPanel.add(createTempPanel("Statistics"), STATISTICS_CARD);
 
