@@ -40,7 +40,7 @@ public class PlaceholderTextField extends JTextField {
             FontMetrics fm = g2.getFontMetrics();
 
             // 텍스트 위치 계산
-            int x = getInsets().left;
+            int x = getInsets().left + 4;
 
             int textHeight = fm.getHeight();
             int componentHeight = getHeight();
