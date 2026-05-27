@@ -9,6 +9,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
 
+import static its.ui.gui.common.UIConstants.ButtonType.PRIMARY;
+
 public class IssuesPanel extends BasePanel {
 
     // 필터 컴포넌트
@@ -99,9 +101,7 @@ public class IssuesPanel extends BasePanel {
         title.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
         panel.add(title, BorderLayout.WEST);
 
-        createIssueButton = createStyledButton("+ 이슈 등록");
-        createIssueButton.setBackground(UIConstants.PRIMARY_BUTTON_COLOR);
-        createIssueButton.setForeground(Color.WHITE);
+        createIssueButton = createStyledButton("+ 이슈 등록", PRIMARY);
         panel.add(createIssueButton, BorderLayout.EAST);
 
         return panel;
@@ -126,13 +126,10 @@ public class IssuesPanel extends BasePanel {
         panel.add(titleSearchField, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel();
-        searchButton = createStyledButton("검색");
-        searchButton.setBackground(UIConstants.PRIMARY_BUTTON_COLOR);
-        searchButton.setForeground(Color.WHITE);
+        searchButton = createStyledButton("검색", PRIMARY);
         buttonPanel.add(searchButton, BorderLayout.WEST);
 
         resetButton = createStyledButton("초기화");
-        resetButton.setBackground(UIConstants.SECONDARY_BUTTON_COLOR);
         buttonPanel.add(resetButton, BorderLayout.EAST);
 
         panel.add(buttonPanel, BorderLayout.EAST);

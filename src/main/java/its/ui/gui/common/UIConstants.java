@@ -27,4 +27,6 @@ public class UIConstants {
     public static final int DEFAULT_PADDING = 10;
     public static final Dimension BUTTON_SIZE = new Dimension(120, 35);
     public static final Dimension INPUT_FIELD_SIZE = new Dimension(200, 40);
+
+    public enum ButtonType {PRIMARY, SECONDARY, DANGER, SUCCESS, WARNING};
 }
