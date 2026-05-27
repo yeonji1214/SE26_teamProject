@@ -3,6 +3,8 @@ package its.ui.gui.panel;
 import its.ui.gui.common.UIConstants;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public abstract class BasePanel extends JPanel {
     public BasePanel() {
@@ -40,14 +42,53 @@ public abstract class BasePanel extends JPanel {
         // Basically do nothing
     }
 
-    protected JButton createStyledButton(String text) {
+    protected JButton createStyledButton(String text, UIConstants.ButtonType type) {
         JButton button = new JButton(text);
         button.setPreferredSize(UIConstants.BUTTON_SIZE);
         button.setFont(UIConstants.BUTTON_FONT);
         button.setOpaque(true);
         button.setBorderPainted(false);
 
+        Color background = switch (type) {
+            case PRIMARY -> UIConstants.PRIMARY_BUTTON_COLOR;
+            case SECONDARY -> UIConstants.SECONDARY_BUTTON_COLOR;
+            case DANGER -> UIConstants.DANGER_BUTTON_COLOR;
+            case SUCCESS -> UIConstants.SUCCESS_BUTTON_COLOR;
+            case WARNING -> UIConstants.WARNING_BUTTON_COLOR;
+        };
+
+        Color foreground = switch (type) {
+            case SECONDARY -> Color.BLACK;
+            default -> Color.WHITE;
+        };
+
+        button.setBackground(background);
+        button.setForeground(foreground);
+
+        Color normalColor = background;
+        Color hoverColor = darken(background);
+
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(hoverColor);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e){
+                button.setBackground(normalColor);
+            }
+        });
+
         return button;
+    }
+
+    protected JButton createStyledButton(String text) {
+        return createStyledButton(text, UIConstants.ButtonType.SECONDARY);
+    }
+
+    private Color darken(Color c) {
+        return new Color(Math.max(0, c.getRed() -20), Math.max(0, c.getGreen() -20), Math.max(0, c.getBlue() -20));
     }
 
     protected JLabel createTitleLabel(String text) {
