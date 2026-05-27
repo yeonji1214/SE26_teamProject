@@ -44,6 +44,8 @@ public abstract class BasePanel extends JPanel {
         JButton button = new JButton(text);
         button.setPreferredSize(UIConstants.BUTTON_SIZE);
         button.setFont(UIConstants.BUTTON_FONT);
+        button.setOpaque(true);
+        button.setBorderPainted(false);
 
         return button;
     }
