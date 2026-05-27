@@ -96,6 +96,7 @@ public class IssuesPanel extends BasePanel {
 
         JLabel title = new JLabel("이슈 목록");
         title.setFont(UIConstants.TITLE_FONT);
+        title.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
         panel.add(title, BorderLayout.WEST);
 
         createIssueButton = createStyledButton("+ 이슈 등록");
@@ -158,11 +159,15 @@ public class IssuesPanel extends BasePanel {
     }
 
     private JPanel createFilterCell(String text, JComponent component) {
-        JPanel cell = new JPanel(new GridLayout(2,1, 0, 0));
+        JPanel cell = new JPanel();
+        cell.setLayout(new BoxLayout(cell, BoxLayout.Y_AXIS));
 
         JLabel label = new JLabel(text);
         label.setFont(UIConstants.LABEL_FONT);
-        label.setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 0));
+        label.setBorder(BorderFactory.createEmptyBorder(0, 6, 2, 0));
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        component.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         cell.add(label);
         cell.add(component);
