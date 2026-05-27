@@ -74,6 +74,8 @@ public class IssuesPanel extends BasePanel {
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
         add(tableScrollPane, gbc);
+
+        loadDummyData();
     }
 
     @Override
@@ -213,6 +215,18 @@ public class IssuesPanel extends BasePanel {
                 return c;
             }
         });
+    }
+
+    private void loadDummyData() {
+        // TODO: 나중에 Service 호출로 교체
+
+        addIssue(1, "로그인 후 이슈 목록이 보이지 않음", "ASSIGNED", "MAJOR", "tester1", "dev1", "2026-05-22");
+        addIssue(2, "이슈 등록 시 priority 기본값 확인 필요", "NEW", "MAJOR", "tester1", "-", "2026-05-22");
+        addIssue(3, "통계 페이지 월별 이슈 수 표시 오류", "RESOLVED", "MINOR", "tester1", "dev2", "2026-05-21");
+    }
+
+    private void addIssue(int ID, String title, String status, String priority, String reporter, String assignee, String date) {
+        tableModel.addRow(new Object[] {ID, title, status, priority, reporter, assignee, date});
     }
 
     public void setIssueActionListener(IssueActionListener listener){
