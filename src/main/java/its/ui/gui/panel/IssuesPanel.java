@@ -237,4 +237,21 @@ public class IssuesPanel extends BasePanel {
         void onCreateIssueRequested();
         void onIssueSelected(int issueId);
     }
+
+    @Override
+    public void clear() {
+        projectComboBox.setSelectedIndex(0);
+        statusComboBox.setSelectedIndex(0);
+        priorityComboBox.setSelectedIndex(0);
+        reporterField.setText("");
+        assigneeField.setText("");
+        titleSearchField.setText("");
+        issueTable.clearSelection();
+    }
+
+    @Override
+    public void onActivate() {
+        issueTable.clearSelection();
+        // TODO: 이슈 목록 새로고침(서비스 연결)
+    }
 }
