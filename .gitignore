@@ -66,3 +66,8 @@ bin/
 # JVM crash logs
 hs_err_pid*
 replay_pid*
+
+# Local SQLite database files
+*.db
+*.sqlite
+*.sqlite3
