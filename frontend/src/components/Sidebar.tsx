@@ -4,6 +4,9 @@ function Sidebar() {
   return (
     <aside className="sidebar">
       <nav className="sidebar-nav">
+        <NavLink to="/dashboard" className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}>
+          Dashboard
+        </NavLink>
         <NavLink to="/projects" className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}>
           Projects
         </NavLink>

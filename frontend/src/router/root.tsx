@@ -6,6 +6,7 @@ import IssueListPage from "../pages/IssueListPage";
 import IssueCreatePage from "../pages/IssueCreatePage";
 import IssueDetailPage from "../pages/IssueDetailPage";
 import StatisticsPage from "../pages/StatisticsPage";
+import DashboardPage from "../pages/DashboardPage";
 
 const root = createBrowserRouter([
   {
@@ -14,7 +15,11 @@ const root = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <ProjectPage />,
+        element: <DashboardPage />,
+      },
+      {
+        path: "dashboard",
+        element: <DashboardPage />,
       },
       {
         path: "login",
