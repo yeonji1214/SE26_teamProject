@@ -760,3 +760,147 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+.login-page {
+  width: 100%;
+  min-height: calc(100vh - 160px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 60px;
+}
+
+.login-card {
+  width: 420px;
+  border-radius: 12px;
+  background: white;
+  padding: 32px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.login-header h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.login-header p {
+  margin: 8px 0 0;
+  color: #6b7280;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.login-field span {
+  font-size: 13px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.login-field select {
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  padding: 0 14px;
+  background: #d9d9d9;
+  color: #111827;
+  outline: none;
+}
+
+.login-user-preview {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-radius: 10px;
+  background: #f3f4f6;
+  padding: 16px;
+}
+
+.login-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #9ca3af;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+.login-user-preview strong {
+  display: block;
+  color: #111827;
+}
+
+.login-user-preview p {
+  margin: 4px 0 0;
+  color: #6b7280;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sidebar-user-box {
+  border-top: 1px solid #4b5563;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sidebar-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-user-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #9ca3af;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+.sidebar-user-info strong {
+  display: block;
+  color: white;
+  font-size: 14px;
+}
+
+.sidebar-user-info span {
+  display: block;
+  color: #d1d5db;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.sidebar-logout-button {
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: #374151;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sidebar-logout-button:hover {
+  background: #4b5563;
+}

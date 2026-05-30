@@ -15,7 +15,7 @@ const root = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <DashboardPage />,
+        element: <LoginPage />,
       },
       {
         path: "dashboard",
