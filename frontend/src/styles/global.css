@@ -1044,3 +1044,159 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+
+/*statistics part*/
+.statistics-page {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.statistics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.statistics-header h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.statistics-header p {
+  margin: 8px 0 0;
+  color: #6b7280;
+}
+
+.stat-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.stat-summary-card {
+  min-height: 130px;
+  border-radius: 8px;
+  background: #d9d9d9;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.stat-summary-card span {
+  font-size: 14px;
+  font-weight: 800;
+  color: #374151;
+}
+
+.stat-summary-card strong {
+  font-size: 34px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.stat-summary-card p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.statistics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.stat-panel {
+  min-height: 320px;
+  border-radius: 8px;
+  background: #d9d9d9;
+  overflow: hidden;
+}
+
+.status-chart-list {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.status-chart-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.status-chart-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-chart-label span {
+  font-size: 14px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.status-chart-label strong {
+  font-size: 14px;
+  font-weight: 800;
+  color: #2563eb;
+}
+
+.status-chart-bar-track {
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+  background: #eeeeee;
+  overflow: hidden;
+}
+
+.status-chart-bar {
+  height: 100%;
+  border-radius: 999px;
+  background: #2563eb;
+}
+
+.issue-trend-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.issue-trend-table th {
+  height: 44px;
+  padding: 0 16px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 800;
+  color: #111827;
+  background: #cfcfcf;
+}
+
+.issue-trend-table td {
+  height: 48px;
+  padding: 0 16px;
+  font-size: 14px;
+  color: #111827;
+  border-top: 1px solid #c7c7c7;
+  background: #eeeeee;
+}
+
+@media (max-width: 1000px) {
+  .stat-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .statistics-grid {
+    grid-template-columns: 1fr;
+  }
+}
