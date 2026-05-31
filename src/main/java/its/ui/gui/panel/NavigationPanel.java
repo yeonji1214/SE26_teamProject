@@ -128,4 +128,13 @@ public class NavigationPanel extends JPanel {
             currentSelectedButton.setBackground(UIConstants.PRIMARY_BUTTON_COLOR);
         }
     }
+
+    public void selectButton(String menuName) {
+        switch (menuName) {
+            case NavigationListener.PROJECTS -> selectButton(projectsButton);
+            case NavigationListener.ISSUES -> selectButton(issuesButton);
+            case NavigationListener.CREATE_ISSUES -> selectButton(createIssueButton);
+            case NavigationListener.STATISTICS -> selectButton(statisticsButton);
+        }
+    }
 }

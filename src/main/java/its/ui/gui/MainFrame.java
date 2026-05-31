@@ -106,6 +106,7 @@ public class MainFrame extends JFrame {
             @Override
             public void onCreateIssueRequested() {
                 contentCardLayout.show(contentAreaPanel, CREATE_ISSUE_CARD);
+                navigationPanel.selectButton("CREATE_ISSUE");
             }
 
             public void onIssueSelected(int issueId) {
