@@ -27,7 +27,15 @@ public class ServiceFactory {
         UserService userService = new UserService(userRepository);
         ProjectService projectService = new ProjectService(projectRepository);
         IssueService issueService = new IssueService(issueRepository, userRepository, projectRepository);
+        StatisticsService statisticsService = new StatisticsService(issueRepository);
+        RecommendationService recommendationService = new RecommendationService(issueRepository);
 
-        return new ApplicationServices(userService, projectService, issueService);
+        return new ApplicationServices(
+                userService,
+                projectService,
+                issueService,
+                statisticsService,
+                recommendationService
+        );
     }
 }
