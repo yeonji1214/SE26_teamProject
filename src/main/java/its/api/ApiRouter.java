@@ -3,6 +3,8 @@ package its.api;
 import com.sun.net.httpserver.HttpExchange;
 import its.api.handler.IssueApiHandler;
 import its.api.handler.ProjectApiHandler;
+import its.api.handler.RecommendationApiHandler;
+import its.api.handler.StatisticsApiHandler;
 import its.api.handler.UserApiHandler;
 import its.service.ApplicationServices;
 
@@ -13,12 +15,16 @@ public class ApiRouter extends ApiHandlerSupport {
     private final UserApiHandler userApiHandler;
     private final ProjectApiHandler projectApiHandler;
     private final IssueApiHandler issueApiHandler;
+    private final StatisticsApiHandler statisticsApiHandler;
+    private final RecommendationApiHandler recommendationApiHandler;
 
     public ApiRouter(ApplicationServices services) {
         super(services);
         this.userApiHandler = new UserApiHandler(services);
         this.projectApiHandler = new ProjectApiHandler(services);
         this.issueApiHandler = new IssueApiHandler(services);
+        this.statisticsApiHandler = new StatisticsApiHandler(services);
+        this.recommendationApiHandler = new RecommendationApiHandler(services);
     }
 
     @Override
@@ -28,6 +34,11 @@ public class ApiRouter extends ApiHandlerSupport {
         }
 
         List<String> segments = pathSegments(exchange);
+
+        if (recommendationApiHandler.isRecommendationPath(segments)) {
+            recommendationApiHandler.handle(exchange);
+            return;
+        }
 
         if (segments.size() >= 2 && "users".equals(segments.get(1))) {
             userApiHandler.handle(exchange);
@@ -46,6 +57,11 @@ public class ApiRouter extends ApiHandlerSupport {
 
         if (segments.size() >= 2 && "issues".equals(segments.get(1))) {
             issueApiHandler.handle(exchange);
+            return;
+        }
+
+        if (segments.size() >= 2 && "statistics".equals(segments.get(1))) {
+            statisticsApiHandler.handle(exchange);
             return;
         }
 
