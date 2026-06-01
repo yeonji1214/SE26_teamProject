@@ -115,7 +115,29 @@ public class MainFrame extends JFrame {
         });
 
         contentAreaPanel.add(issuesPanel, ISSUES_CARD);
-        contentAreaPanel.add(createTempPanel("Create Issue"), CREATE_ISSUE_CARD);
+
+        CreateIssuePanel createIssuePanel = new CreateIssuePanel();
+        createIssuePanel.setCreateIssueActionListener(new CreateIssuePanel.CreateIssueActionListener() {
+            @Override
+            public void onCancelRequested() {
+                System.out.println("[MainFrame] Create Issue Cancel Requested");
+                contentCardLayout.show(contentAreaPanel, ISSUES_CARD);
+                navigationPanel.selectButton("ISSUE");
+            }
+
+            @Override
+            public void onSaveRequested(String project, String title, String description, String priority) {
+                System.out.println("[MainFrame] Create Issue Save Requested");
+                System.out.println("[MainFrame] Selected Project: " + project);
+                System.out.println("[MainFrame] Entered Title: " + title);
+                System.out.println("[MainFrame] Entered Description: " + description);
+                System.out.println("[MainFrame] Selected Priority: " + priority);
+                // TODO: validation 및 DB 저장 로직 호출
+            }
+        });
+
+        contentAreaPanel.add(createIssuePanel, CREATE_ISSUE_CARD);
+
         contentAreaPanel.add(createTempPanel("Statistics"), STATISTICS_CARD);
 
         panel.add(contentAreaPanel, BorderLayout.CENTER);
@@ -157,4 +179,6 @@ public class MainFrame extends JFrame {
             }
         }
     }
+
+
 }

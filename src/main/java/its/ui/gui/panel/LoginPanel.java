@@ -6,7 +6,6 @@ import its.ui.gui.common.PlaceholderPasswordField;
 import javax.swing.*;
 import java.awt.*;
 
-import static its.ui.gui.common.UIConstants.ButtonType.PRIMARY;
 
 public class LoginPanel extends BasePanel{
     // UI Components
@@ -52,7 +51,7 @@ public class LoginPanel extends BasePanel{
         gbc.gridy = 1;
         panel.add(passwordField, gbc);
 
-        loginButton = createStyledButton("login", PRIMARY);
+        loginButton = createStyledButton("login", UIConstants.ButtonType.PRIMARY);
         gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.gridheight = 2;
