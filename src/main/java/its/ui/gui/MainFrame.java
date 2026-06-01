@@ -1,6 +1,7 @@
 package its.ui.gui;
 
 import its.domain.issue.IssueStatus;
+import its.domain.issue.Priority;
 import its.ui.gui.common.UIConstants;
 import its.ui.gui.panel.*;
 
@@ -135,7 +136,7 @@ public class MainFrame extends JFrame {
             }
 
             @Override
-            public void onSaveRequested(String project, String title, String description, String priority) {
+            public void onSaveRequested(String project, String title, String description, Priority priority) {
                 System.out.println("[MainFrame] Create Issue Save Requested");
                 System.out.println("[MainFrame] Selected Project: " + project);
                 System.out.println("[MainFrame] Entered Title: " + title);
