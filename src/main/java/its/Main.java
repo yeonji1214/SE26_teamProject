@@ -1,5 +1,6 @@
 package its;
 
+import its.api.ApiServer;
 import its.domain.issue.Issue;
 import its.domain.issue.IssueStatus;
 import its.service.ApplicationServices;
@@ -12,14 +13,30 @@ import java.util.List;
 import java.util.Optional;
 
 public class Main {
-    public static void main(String[] args) {
-        Path databasePath = Path.of("issue-tracker.db");
+    private static final Path DATABASE_PATH = Path.of("issue-tracker.db");
 
-        ApplicationServices services = ServiceFactory.createWithSqliteDatabase(databasePath);
+    public static void main(String[] args) {
+        ApplicationServices services = ServiceFactory.createWithSqliteDatabase(DATABASE_PATH);
         new DemoDataSeeder(services).seedIfEmpty();
 
+        if (args.length > 0 && "api".equalsIgnoreCase(args[0])) {
+            startApiServer(services);
+            return;
+        }
+
+        printConsoleDemo(services);
+    }
+
+    private static void startApiServer(ApplicationServices services) {
+        ApiServer apiServer = ApiServer.create(8080, services);
+        apiServer.start();
+
+        System.out.println("Use Ctrl+C to stop the API server.");
+    }
+
+    private static void printConsoleDemo(ApplicationServices services) {
         System.out.println("Issue Tracker backend initialized.");
-        System.out.println("Database file: " + databasePath.toAbsolutePath());
+        System.out.println("Database file: " + DATABASE_PATH.toAbsolutePath());
         System.out.println("Users: " + services.getUserService().getAllUsers().size());
         System.out.println("Projects: " + services.getProjectService().getAllProjects().size());
         System.out.println("Issues: " + services.getIssueService().getAllIssues().size());
