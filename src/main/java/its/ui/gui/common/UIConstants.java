@@ -5,7 +5,7 @@ import java.awt.*;
 public class UIConstants {
     // Font constants
     public static final Font TITLE_FONT = new Font("Arial", Font.BOLD, 20);
-    public static final Font SUBTITLE_FONT = new Font("Arial", Font.BOLD, 18);
+    public static final Font SUBTITLE_FONT = new Font("Arial", Font.BOLD, 16);
     public static final Font HEADER_FONT = new Font("Arial", Font.BOLD, 14);
     public static final Font BUTTON_FONT = new Font("Arial", Font.PLAIN, 14);
     public static final Font LABEL_FONT = new Font("Arial", Font.PLAIN, 12);
