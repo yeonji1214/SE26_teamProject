@@ -106,7 +106,7 @@ public class MainFrame extends JFrame {
             @Override
             public void onCreateIssueRequested() {
                 contentCardLayout.show(contentAreaPanel, CREATE_ISSUE_CARD);
-                navigationPanel.selectButton("CREATE_ISSUE");
+                navigationPanel.selectButton(NavigationPanel.NavigationListener.CREATE_ISSUES);
             }
 
             public void onIssueSelected(int issueId) {
@@ -122,7 +122,7 @@ public class MainFrame extends JFrame {
             public void onCancelRequested() {
                 System.out.println("[MainFrame] Create Issue Cancel Requested");
                 contentCardLayout.show(contentAreaPanel, ISSUES_CARD);
-                navigationPanel.selectButton("ISSUE");
+                navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
             }
 
             @Override

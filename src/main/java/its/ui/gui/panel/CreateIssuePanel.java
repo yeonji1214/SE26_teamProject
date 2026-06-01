@@ -49,8 +49,8 @@ public class CreateIssuePanel extends BasePanel {
         saveButton.addActionListener(e -> {
             if (listener != null) {
                 String project = (String) projectComboBox.getSelectedItem();
-                String title = (String) titleTextField.getText();
-                String description = (String) descriptionTextArea.getText();
+                String title = titleTextField.getText();
+                String description = descriptionTextArea.getText();
                 String priority = (String) priorityComboBox.getSelectedItem();
 
                 listener.onSaveRequested(project, title, description, priority);}
