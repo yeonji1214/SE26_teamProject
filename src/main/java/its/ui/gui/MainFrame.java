@@ -150,8 +150,8 @@ public class MainFrame extends JFrame {
             public void onIssueEditRequested(int issueId) {
                 System.out.println("[MainFrame] Issue Detail Edit Requested");
                 System.out.println("[MainFrame] Selected Issue: " + issueId);
+                createIssuePanel.loadIssue(issueId);
                 contentCardLayout.show(contentAreaPanel, CREATE_ISSUE_CARD);
-                // TODO: CreateIssuePanel의 loadIssue(int issueId) 호출
                 navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
             }
 
