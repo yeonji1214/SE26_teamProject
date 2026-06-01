@@ -128,6 +128,13 @@ public class MainFrame extends JFrame {
             }
 
             @Override
+            public void onCancelFromEditRequested(int issueId) {
+                issueDetailPanel.loadIssue(issueId);
+                contentCardLayout.show(contentAreaPanel, ISSUE_DETAIL_CARD);
+                navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
+            }
+
+            @Override
             public void onSaveRequested(String project, String title, String description, String priority) {
                 System.out.println("[MainFrame] Create Issue Save Requested");
                 System.out.println("[MainFrame] Selected Project: " + project);
