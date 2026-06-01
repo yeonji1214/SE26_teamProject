@@ -154,8 +154,8 @@ public class MainFrame extends JFrame {
         );
 
         if (result == JOptionPane.YES_OPTION) {
-            currentUser = null;
             showLoginPanel();
+            currentUser = null;
         }
     }
 

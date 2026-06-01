@@ -240,7 +240,9 @@ public class IssuesPanel extends BasePanel {
 
     @Override
     public void clear() {
-        projectComboBox.setSelectedIndex(0);
+        if (projectComboBox.getItemCount() > 0) {
+            projectComboBox.setSelectedIndex(0);
+        }
         statusComboBox.setSelectedIndex(0);
         priorityComboBox.setSelectedIndex(0);
         reporterField.setText("");
