@@ -22,6 +22,10 @@ public class CreateIssuePanel extends BasePanel {
     // 리스너
     private CreateIssueActionListener listener;
 
+    // 수정모드 관련 필드
+    private boolean isEditMode = false;
+    private int currentIssueId;
+    private JLabel formTitleLabel;
 
     @Override
     protected void initComponents() {
@@ -62,16 +66,16 @@ public class CreateIssuePanel extends BasePanel {
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
 
-        JLabel title = new JLabel("이슈 등록");
-        title.setFont(UIConstants.TITLE_FONT);
-        title.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+        formTitleLabel = new JLabel("이슈 등록");
+        formTitleLabel.setFont(UIConstants.TITLE_FONT);
+        formTitleLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
         gbc.gridy = 0;
         gbc.gridx = 0;
         gbc.weightx = 1.0;
         gbc.weighty = 0.0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 0, 5, 0);
-        panel.add(title, gbc);
+        panel.add(formTitleLabel, gbc);
 
         JLabel projectLabel = new JLabel("프로젝트");
         projectLabel.setFont(UIConstants.LABEL_FONT);
@@ -180,8 +184,24 @@ public class CreateIssuePanel extends BasePanel {
         void onCancelRequested();
     }
 
+    public void loadIssue(int issueId) {
+        isEditMode = true;
+        currentIssueId = issueId;
+
+        formTitleLabel.setText("이슈 수정");
+        saveButton.setText("수정");
+
+        // TODO: 서비스 연결 후 issueId로 실제 이슈 정보 받아오기
+    }
+
     @Override
     public void clear() {
+        // 수정 모드 초기화
+        isEditMode = false;
+        currentIssueId = -1;
+        formTitleLabel.setText("이슈 등록");
+        saveButton.setText("저장");
+
         if (projectComboBox.getItemCount() > 0) {
             projectComboBox.setSelectedIndex(0);
         }
@@ -194,7 +214,9 @@ public class CreateIssuePanel extends BasePanel {
     public void onActivate() {
         // TODO: project 콤보박스 리스트 갱신
 
-        clear();
+        if (!isEditMode) {
+            clear();
+        }
 
         titleTextField.requestFocusInWindow();
     }
