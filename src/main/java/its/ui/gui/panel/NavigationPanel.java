@@ -56,6 +56,8 @@ public class NavigationPanel extends JPanel {
         button.setFont(UIConstants.BUTTON_FONT);
         button.setPreferredSize(new Dimension(170, 50));
         button.setMaximumSize(new Dimension(170, 50));
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
 
         button.setHorizontalAlignment(SwingConstants.LEFT);
 
