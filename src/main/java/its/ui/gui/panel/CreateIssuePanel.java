@@ -1,6 +1,7 @@
 package its.ui.gui.panel;
 
 import its.domain.issue.Priority;
+import its.domain.project.Project;
 import its.ui.gui.common.PlaceholderTextField;
 import its.ui.gui.common.UIConstants;
 
@@ -62,7 +63,7 @@ public class CreateIssuePanel extends BasePanel {
                 String project = (String) projectComboBox.getSelectedItem();
                 String title = titleTextField.getText();
                 String description = descriptionTextArea.getText();
-                String priority = (String) priorityComboBox.getSelectedItem();
+                Priority priority = (Priority) priorityComboBox.getSelectedItem();
 
                 listener.onSaveRequested(project, title, description, priority);}
         });
@@ -186,7 +187,7 @@ public class CreateIssuePanel extends BasePanel {
     }
 
     public interface CreateIssueActionListener {
-        void onSaveRequested(String project, String title, String description, String priority);
+        void onSaveRequested(String project, String title, String description, Priority priority);
         void onCancelRequested();
         void onCancelFromEditRequested(int issueId);
     }

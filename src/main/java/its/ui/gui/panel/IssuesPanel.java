@@ -226,6 +226,7 @@ public class IssuesPanel extends BasePanel {
     }
 
     private void addIssue(int ID, String title, String status, String priority, String reporter, String assignee, String date) {
+        // TODO: date는 LocalDateTime으로 받기
         tableModel.addRow(new Object[] {ID, title, status, priority, reporter, assignee, date});
     }
 
