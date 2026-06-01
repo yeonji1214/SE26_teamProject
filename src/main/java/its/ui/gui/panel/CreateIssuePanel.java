@@ -48,7 +48,13 @@ public class CreateIssuePanel extends BasePanel {
     @Override
     protected void setupListeners() {
         cancelButton.addActionListener(e -> {
-            if (listener != null) {listener.onCancelRequested();}
+            if (listener != null) {
+                if (isEditMode) {
+                    listener.onCancelFromEditRequested(currentIssueId);
+                } else {
+                    listener.onCancelRequested();
+                }
+            }
         });
 
         saveButton.addActionListener(e -> {
@@ -182,6 +188,7 @@ public class CreateIssuePanel extends BasePanel {
     public interface CreateIssueActionListener {
         void onSaveRequested(String project, String title, String description, String priority);
         void onCancelRequested();
+        void onCancelFromEditRequested(int issueId);
     }
 
     public void loadIssue(int issueId) {
