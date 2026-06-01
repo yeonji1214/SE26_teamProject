@@ -94,7 +94,7 @@ public class NavigationPanel extends JPanel {
         button.addActionListener(e -> {
             System.out.println("[NavigationPanel] Button clicked: " + menuName);
 
-            if (NavigationListener.LOGOUT.equals(menuName)) {
+            if (!NavigationListener.LOGOUT.equals(menuName)) {
                 selectButton(button);
             }
 
