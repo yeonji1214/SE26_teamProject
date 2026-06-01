@@ -6,11 +6,13 @@ import its.ui.gui.common.UIConstants;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class IssueDetailPanel extends BasePanel {
 
     // 액션 컴포넌트
-    private JButton backButton;
+    private JLabel backButton;
     private JButton editButton;
     private JButton deleteButton;
     private JButton statusChangeButton;
@@ -53,8 +55,9 @@ public class IssueDetailPanel extends BasePanel {
         descriptionArea.setEditable(false);
         descriptionArea.setLineWrap(true);
         descriptionArea.setWrapStyleWord(true);
+        descriptionArea.setFocusable(false);
 
-        backButton = new JButton("← 이슈 목록으로");
+        backButton = new JLabel("← 이슈 목록으로");
         editButton = createStyledButton("수정");
         deleteButton = createStyledButton("삭제", UIConstants.ButtonType.DANGER);
         statusChangeButton = createStyledButton("상태 변경", UIConstants.ButtonType.PRIMARY);
@@ -66,13 +69,19 @@ public class IssueDetailPanel extends BasePanel {
         commentListPanel.setLayout(new BoxLayout(commentListPanel, BoxLayout.Y_AXIS));
 
         JScrollPane scrollPane = new JScrollPane(createContentPanel());
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
         add(scrollPane, BorderLayout.CENTER);
     }
 
     @Override
     protected void setupListeners() {
-        backButton.addActionListener(e -> {
-            if (listener != null) {listener.onBackRequested();}
+        backButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (listener != null) {
+                    listener.onBackRequested();
+                }
+            }
         });
 
         editButton.addActionListener(e -> {
@@ -93,20 +102,28 @@ public class IssueDetailPanel extends BasePanel {
     }
 
     private JPanel createContentPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
 
-        JPanel headerPanel = createHeaderPanel();
-        headerPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(headerPanel);
+        gbc.gridx = 0;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(0,0,10,0);
 
-        JPanel cardPanel = createCardPanel();
-        cardPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(cardPanel);
+        gbc.gridy = 0;
+        panel.add(createHeaderPanel(), gbc);
 
-        JPanel commentPanel = createCommentPanel();
-        commentPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(commentPanel);
+        gbc.gridy = 1;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 0.7;
+        panel.add(createCardPanel(), gbc);
+
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weighty = 0.3;
+        gbc.insets = new Insets(20,0,0,0);
+        panel.add(createCommentPanel(), gbc);
 
         return panel;
     }
@@ -114,16 +131,13 @@ public class IssueDetailPanel extends BasePanel {
     private JPanel createHeaderPanel() {
         JPanel panel = new JPanel(new BorderLayout());
 
-        JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        northPanel.setBorder(BorderFactory.createEmptyBorder(0,0,20,0));
+        JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
-        backButton.setContentAreaFilled(false);
-        backButton.setBorderPainted(false);
-        backButton.setFocusPainted(false);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         backButton.setForeground(UIConstants.PRIMARY_BUTTON_COLOR);
 
         northPanel.add(backButton);
+        northPanel.setBorder(BorderFactory.createEmptyBorder(0,0,10,0));
         panel.add(northPanel, BorderLayout.NORTH);
 
         JPanel centerPanel = new JPanel();
@@ -152,19 +166,28 @@ public class IssueDetailPanel extends BasePanel {
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
 
+        gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 0.25;
+        gbc.weighty = 1.0;
+        gbc.anchor = GridBagConstraints.NORTH;
         gbc.gridx = 0;
         gbc.insets = new Insets(0,0,0,10);
-        panel.add(createInfoCard(), gbc);
+        JPanel infoCard = createInfoCard();
+        infoCard.setPreferredSize(new Dimension(0, 0));
+        panel.add(infoCard, gbc);
 
         gbc.weightx = 0.5;
         gbc.gridx = 1;
-        panel.add(createDescriptionCard(), gbc);
+        JPanel descriptionCard = createDescriptionCard();
+        descriptionCard.setPreferredSize(new Dimension(0, 0));
+        panel.add(descriptionCard, gbc);
 
         gbc.weightx = 0.25;
         gbc.gridx = 2;
         gbc.insets = new Insets(0, 0, 0, 0);
-        panel.add(createActionCard(), gbc);
+        JPanel actionCard = createActionCard();
+        actionCard.setPreferredSize(new Dimension(0, 0));
+        panel.add(actionCard, gbc);
 
         return panel;
     }
@@ -192,14 +215,22 @@ public class IssueDetailPanel extends BasePanel {
 
         JLabel title = new JLabel("이슈 정보");
         title.setFont(UIConstants.SUBTITLE_FONT);
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         card.add(title);
+        card.add(Box.createVerticalStrut(10));
         card.add(createInfoRow("프로젝트", projectValue));
+        card.add(Box.createVerticalStrut(5));
         card.add(createInfoRow("리포터", reporterValue));
+        card.add(Box.createVerticalStrut(5));
         card.add(createInfoRow("등록일", dateValue));
+        card.add(Box.createVerticalStrut(5));
         card.add(createInfoRow("담당자", assigneeValue));
+        card.add(Box.createVerticalStrut(5));
         card.add(createInfoRow("수행자", fixerValue));
+        card.add(Box.createVerticalStrut(5));
         card.add(createInfoRow("상태", statusValue));
+        card.add(Box.createVerticalStrut(5));
         card.add(createInfoRow("우선순위", priorityValue));
 
         return card;
@@ -212,10 +243,13 @@ public class IssueDetailPanel extends BasePanel {
 
         JLabel title = new JLabel("설명");
         title.setFont(UIConstants.SUBTITLE_FONT);
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         card.add(title);
+        card.add(Box.createVerticalStrut(10));
 
         descriptionArea.setOpaque(false);
+        descriptionArea.setAlignmentX(Component.LEFT_ALIGNMENT);
         card.add(descriptionArea);
 
         return card;
@@ -230,33 +264,41 @@ public class IssueDetailPanel extends BasePanel {
         title.setFont(UIConstants.SUBTITLE_FONT);
         title.setAlignmentX(Component.LEFT_ALIGNMENT);
         card.add(title);
+        card.add(Box.createVerticalStrut(10));
 
         JLabel statusChangeLabel = new JLabel("상태 변경");
         statusChangeLabel.setFont(UIConstants.LABEL_FONT);
         statusChangeLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         card.add(statusChangeLabel);
+        card.add(Box.createVerticalStrut(5));
 
         statusComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statusComboBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, statusComboBox.getPreferredSize().height));
         card.add(statusComboBox);
+        card.add(Box.createVerticalStrut(5));
 
         JLabel commentLabel = new JLabel("코멘트");
         commentLabel.setFont(UIConstants.LABEL_FONT);
         commentLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         card.add(commentLabel);
+        card.add(Box.createVerticalStrut(5));
 
         JScrollPane scrollPane = new JScrollPane(commentTextArea);
         scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+        scrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
         card.add(scrollPane);
+        card.add(Box.createVerticalStrut(5));
 
-        statusChangeButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        statusChangeButton.setAlignmentX(Component.LEFT_ALIGNMENT);
         card.add(statusChangeButton);
 
         return card;
     }
 
     private JPanel createInfoRow(String labelText, JLabel valueLabel) {
-        JPanel panel = new JPanel();
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.setBackground(UIConstants.CARD_COLOR);
 
         JLabel label = new JLabel(labelText);
         label.setFont(UIConstants.LABEL_FONT);
@@ -264,6 +306,7 @@ public class IssueDetailPanel extends BasePanel {
 
         panel.add(label);
         panel.add(valueLabel);
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, panel.getPreferredSize().height));
 
         return panel;
     }
@@ -286,6 +329,7 @@ public class IssueDetailPanel extends BasePanel {
         commentArea.setLineWrap(true);
         commentArea.setWrapStyleWord(true);
         commentArea.setOpaque(false);
+        commentArea.setFocusable(false);
 
         card.add(commentArea);
 

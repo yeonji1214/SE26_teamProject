@@ -48,6 +48,8 @@ public abstract class BasePanel extends JPanel {
         button.setFont(UIConstants.BUTTON_FONT);
         button.setOpaque(true);
         button.setBorderPainted(false);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
 
         Color background = switch (type) {
             case PRIMARY -> UIConstants.PRIMARY_BUTTON_COLOR;
