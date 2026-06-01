@@ -1,5 +1,6 @@
 package its.ui.gui.panel;
 
+import its.domain.issue.Priority;
 import its.ui.gui.common.PlaceholderTextField;
 import its.ui.gui.common.UIConstants;
 
@@ -12,7 +13,7 @@ public class CreateIssuePanel extends BasePanel {
     private JComboBox<String> projectComboBox;
     private PlaceholderTextField titleTextField;
     private JTextArea descriptionTextArea;
-    private JComboBox<String> priorityComboBox;
+    private JComboBox<Priority> priorityComboBox;
 
     // 버튼
     private JButton cancelButton;
@@ -29,7 +30,7 @@ public class CreateIssuePanel extends BasePanel {
         descriptionTextArea = new JTextArea();
         descriptionTextArea.setLineWrap(true);
         descriptionTextArea.setWrapStyleWord(true);
-        priorityComboBox = new JComboBox<>(new String[]{"BLOCKER", "CRITICAL", "MAJOR", "MINOR", "TRIVIAL"});
+        priorityComboBox = new JComboBox<>(Priority.values());
 
         JPanel formPanel = createFormPanel();
         JPanel infoPanel = createInfoPanel();
@@ -154,7 +155,7 @@ public class CreateIssuePanel extends BasePanel {
 
     private JPanel createInfoCell(String title, String description) {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(UIConstants.SECONDARY_BUTTON_COLOR);
+        panel.setBackground(UIConstants.CARD_COLOR);
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JLabel titleLabel = new JLabel(title);
