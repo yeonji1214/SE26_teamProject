@@ -1,5 +1,6 @@
 package its.ui.gui;
 
+import its.domain.issue.IssueStatus;
 import its.ui.gui.common.UIConstants;
 import its.ui.gui.panel.*;
 
@@ -23,6 +24,7 @@ public class MainFrame extends JFrame {
     private static final String PROJECTS_CARD = "PROJECTS";
     private static final String ISSUES_CARD = "ISSUES";
     private static final String CREATE_ISSUE_CARD = "CREATE_ISSUE";
+    private static final String ISSUE_DETAIL_CARD = "ISSUE_DETAIL";
     private static final String STATISTICS_CARD = "STATISTICS";
 
     public MainFrame() {
@@ -99,9 +101,10 @@ public class MainFrame extends JFrame {
         contentCardLayout = new CardLayout();
         contentAreaPanel = new JPanel(contentCardLayout);
 
-        contentAreaPanel.add(new ProjectsPanel(), PROJECTS_CARD);
-
         IssuesPanel issuesPanel = new IssuesPanel();
+        CreateIssuePanel createIssuePanel = new CreateIssuePanel();
+        IssueDetailPanel issueDetailPanel = new IssueDetailPanel();
+
         issuesPanel.setIssueActionListener(new IssuesPanel.IssueActionListener() {
             @Override
             public void onCreateIssueRequested() {
@@ -110,13 +113,12 @@ public class MainFrame extends JFrame {
             }
 
             public void onIssueSelected(int issueId) {
-                // TODO: 이슈 상세 패널에 ID 전달 후 화면 전환
+                issueDetailPanel.loadIssue(issueId);
+                contentCardLayout.show(contentAreaPanel, ISSUE_DETAIL_CARD);
+                navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
             }
         });
 
-        contentAreaPanel.add(issuesPanel, ISSUES_CARD);
-
-        CreateIssuePanel createIssuePanel = new CreateIssuePanel();
         createIssuePanel.setCreateIssueActionListener(new CreateIssuePanel.CreateIssueActionListener() {
             @Override
             public void onCancelRequested() {
@@ -136,8 +138,45 @@ public class MainFrame extends JFrame {
             }
         });
 
-        contentAreaPanel.add(createIssuePanel, CREATE_ISSUE_CARD);
+        issueDetailPanel.setIssueDetailActionListener(new IssueDetailPanel.IssueDetailActionListener() {
+            @Override
+            public void onBackRequested() {
+                System.out.println("[MainFrame] Issue Detail Back Requested");
+                contentCardLayout.show(contentAreaPanel, ISSUES_CARD);
+                navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
+            }
 
+            @Override
+            public void onIssueEditRequested(int issueId) {
+                System.out.println("[MainFrame] Issue Detail Edit Requested");
+                System.out.println("[MainFrame] Selected Issue: " + issueId);
+                contentCardLayout.show(contentAreaPanel, CREATE_ISSUE_CARD);
+                // TODO: CreateIssuePanel의 loadIssue(int issueId) 호출
+                navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
+            }
+
+            @Override
+            public void onIssueDeleteRequested(int issueId) {
+                System.out.println("[MainFrame] Issue Detail Delete Requested");
+                System.out.println("[MainFrame] Selected Issue: " + issueId);
+                // TODO: 정말 삭제하겠습니까? 팝업 띄우기(handleLogout 참고)
+                contentCardLayout.show(contentAreaPanel, ISSUES_CARD);
+                // TODO: 이슈 제거 로직 호출
+                navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
+            }
+
+            @Override
+            public void onStatusChangeRequested(int issueId, IssueStatus status, String comment) {
+                System.out.println("[MainFrame] Issue Detail Change Requested");
+                System.out.println("[MainFrame] Selected Issue: " + issueId);
+                // TODO: 코멘트 등록 로직 호출
+            }
+        });
+
+        contentAreaPanel.add(new ProjectsPanel(), PROJECTS_CARD);
+        contentAreaPanel.add(issuesPanel, ISSUES_CARD);
+        contentAreaPanel.add(createIssuePanel, CREATE_ISSUE_CARD);
+        contentAreaPanel.add(issueDetailPanel, ISSUE_DETAIL_CARD);
         contentAreaPanel.add(createTempPanel("Statistics"), STATISTICS_CARD);
 
         panel.add(contentAreaPanel, BorderLayout.CENTER);

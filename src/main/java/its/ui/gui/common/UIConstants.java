@@ -1,6 +1,8 @@
 package its.ui.gui.common;
 
 import java.awt.*;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class UIConstants {
     // Font constants
@@ -12,6 +14,7 @@ public class UIConstants {
 
     // Color constants
     public static final Color BACKGROUND_COLOR = new Color(240, 240, 240);
+    public static final Color CARD_COLOR = new Color(200, 200, 200);
     public static final Color PRIMARY_COLOR = new Color (36, 99, 235);
 
     public static final Color NAVIGATION_COLOR = new Color (16, 24, 39);
@@ -29,4 +32,7 @@ public class UIConstants {
     public static final Dimension INPUT_FIELD_SIZE = new Dimension(200, 40);
 
     public enum ButtonType {PRIMARY, SECONDARY, DANGER, SUCCESS, WARNING};
+
+    public static final DateTimeFormatter DATE_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy. M. d. a hh:mm:ss", Locale.KOREAN);
 }
