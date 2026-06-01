@@ -12,6 +12,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ServiceFactoryTest {
 
@@ -43,5 +44,18 @@ class ServiceFactoryTest {
         assertEquals("Persist issue", loaded.getTitle());
         assertEquals(IssueStatus.NEW, loaded.getStatus());
         assertEquals("tester1", loaded.getReporter().getUsername());
+    }
+
+    @Test
+    void factoryProvidesStatisticsAndRecommendationServices() {
+        Path databasePath = tempDir.resolve("factory-services-test.db");
+
+        ApplicationServices services = ServiceFactory.createWithSqliteDatabase(databasePath);
+
+        assertNotNull(services.getUserService());
+        assertNotNull(services.getProjectService());
+        assertNotNull(services.getIssueService());
+        assertNotNull(services.getStatisticsService());
+        assertNotNull(services.getRecommendationService());
     }
 }
