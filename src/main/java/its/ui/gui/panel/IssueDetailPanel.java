@@ -3,7 +3,10 @@ package its.ui.gui.panel;
 import its.domain.issue.Comment;
 import its.domain.issue.Issue;
 import its.domain.issue.IssueStatus;
+import its.domain.user.Role;
+import its.domain.user.User;
 import its.service.IssueService;
+import its.service.UserService;
 import its.ui.gui.common.UIConstants;
 
 import javax.swing.*;
@@ -17,6 +20,7 @@ public class IssueDetailPanel extends BasePanel {
     private JButton deleteButton;
     private JButton statusChangeButton;
     private JComboBox<IssueStatus> statusComboBox;
+    private JComboBox<User> assigneeComboBox;
     private JTextArea commentTextArea;
 
     private JLabel titleLabel;
@@ -32,13 +36,26 @@ public class IssueDetailPanel extends BasePanel {
 
     private JPanel commentListPanel;
 
+    private JScrollPane mainScrollPane;
+
     private IssueDetailActionListener listener;
     private IssueService issueService;
+    private UserService userService;
 
     private int currentIssueId;
 
+    private boolean assignable = false;
+
     public void setIssueService(IssueService issueService) {
         this.issueService = issueService;
+    }
+
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
+    public void setAssignable(boolean assignable) {
+        this.assignable = assignable;
     }
 
     @Override
@@ -65,6 +82,7 @@ public class IssueDetailPanel extends BasePanel {
         statusChangeButton = createStyledButton("상태 변경", UIConstants.ButtonType.PRIMARY);
 
         statusComboBox = new JComboBox<>(IssueStatus.values());
+        assigneeComboBox = new JComboBox<>();
 
         commentTextArea = new JTextArea();
         commentTextArea.setRows(6);
@@ -75,16 +93,17 @@ public class IssueDetailPanel extends BasePanel {
         commentListPanel.setLayout(new BoxLayout(commentListPanel, BoxLayout.Y_AXIS));
         commentListPanel.setBackground(UIConstants.CARD_COLOR);
 
-        JScrollPane scrollPane = new JScrollPane(createContentPanel());
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        add(scrollPane, BorderLayout.CENTER);
+        mainScrollPane = new JScrollPane(createContentPanel());
+        mainScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        mainScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        add(mainScrollPane, BorderLayout.CENTER);
     }
 
     @Override
     protected void setupListeners() {
         backButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mouseReleased(MouseEvent e) {
                 if (listener != null) {
                     listener.onBackRequested();
                 }
@@ -107,9 +126,17 @@ public class IssueDetailPanel extends BasePanel {
             if (listener != null) {
                 IssueStatus selected = (IssueStatus) statusComboBox.getSelectedItem();
                 String comment = commentTextArea.getText();
-                listener.onStatusChangeRequested(currentIssueId, selected, comment);
+                Long assigneeId = null;
+                if (assignable && selected == IssueStatus.ASSIGNED) {
+                    if (assigneeComboBox.getSelectedItem() instanceof User user){
+                        assigneeId = user.getId();
+                    }
+                }
+                listener.onStatusChangeRequested(currentIssueId, selected, assigneeId, comment);
             }
         });
+
+        statusComboBox.addActionListener(e -> updateAssigneeComboState());
     }
 
     private JPanel createContentPanel() {
@@ -122,19 +149,23 @@ public class IssueDetailPanel extends BasePanel {
         gbc.insets = new Insets(0, 0, 10, 0);
 
         gbc.gridy = 0;
+        gbc.weighty = 0.0;
         panel.add(createHeaderPanel(), gbc);
 
         gbc.gridy = 1;
         gbc.fill = GridBagConstraints.BOTH;
-        gbc.weighty = 0.7;
         panel.add(createCardPanel(), gbc);
 
         gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.NORTH;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weighty = 0.3;
         gbc.insets = new Insets(20, 0, 0, 0);
         panel.add(createCommentPanel(), gbc);
+
+        gbc.gridy = 3;
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        panel.add(new JPanel(null) {{ setOpaque(false); }}, gbc);
 
         return panel;
     }
@@ -184,14 +215,14 @@ public class IssueDetailPanel extends BasePanel {
         gbc.insets = new Insets(0, 0, 0, 10);
 
         JPanel infoCard = createInfoCard();
-        infoCard.setPreferredSize(new Dimension(0, 0));
+        infoCard.setPreferredSize(new Dimension(0, infoCard.getPreferredSize().height));
         panel.add(infoCard, gbc);
 
         gbc.weightx = 0.5;
         gbc.gridx = 1;
 
         JPanel descriptionCard = createDescriptionCard();
-        descriptionCard.setPreferredSize(new Dimension(0, 0));
+        descriptionCard.setPreferredSize(new Dimension(0, descriptionCard.getPreferredSize().height));
         panel.add(descriptionCard, gbc);
 
         gbc.weightx = 0.25;
@@ -199,7 +230,7 @@ public class IssueDetailPanel extends BasePanel {
         gbc.insets = new Insets(0, 0, 0, 0);
 
         JPanel actionCard = createActionCard();
-        actionCard.setPreferredSize(new Dimension(0, 0));
+        actionCard.setPreferredSize(new Dimension(0, actionCard.getPreferredSize().height));
         panel.add(actionCard, gbc);
 
         return panel;
@@ -296,6 +327,28 @@ public class IssueDetailPanel extends BasePanel {
         card.add(statusComboBox);
         card.add(Box.createVerticalStrut(10));
 
+        JLabel assigneeChangeLabel = new JLabel("담당자 지정");
+        assigneeChangeLabel.setFont(UIConstants.LABEL_FONT);
+        assigneeChangeLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        card.add(assigneeChangeLabel);
+        card.add(Box.createVerticalStrut(5));
+
+        assigneeComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(
+                    JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof User user) {
+                    setText(user.getUsername());
+                }
+                return this;
+            }
+        });
+        assigneeComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        assigneeComboBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, assigneeComboBox.getPreferredSize().height));
+        card.add(assigneeComboBox);
+        card.add(Box.createVerticalStrut(10));
+
         JLabel commentLabel = new JLabel("코멘트");
         commentLabel.setFont(UIConstants.LABEL_FONT);
         commentLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -384,10 +437,26 @@ public class IssueDetailPanel extends BasePanel {
         statusValue.setText(issue.getStatus().name());
         priorityValue.setText(issue.getPriority().name());
         descriptionArea.setText(issue.getDescription());
+        descriptionArea.setCaretPosition(0);
         statusComboBox.setSelectedItem(issue.getStatus());
+        assigneeComboBox.removeAllItems();
+        if (userService != null) {
+            for (User user : userService.getAllUsers()) {
+                if (user.hasRole(Role.DEV)) {
+                    assigneeComboBox.addItem(user);
+                }
+            }
+        }
+        assigneeComboBox.setSelectedItem(issue.getAssignee());
+        updateAssigneeComboState();
+
         commentTextArea.setText("");
 
         refreshComments(issueId);
+
+        SwingUtilities.invokeLater(() -> {
+            mainScrollPane.getVerticalScrollBar().setValue(0);
+        });
     }
 
     private void refreshComments(int issueId) {
@@ -414,6 +483,11 @@ public class IssueDetailPanel extends BasePanel {
         commentListPanel.repaint();
     }
 
+    private void updateAssigneeComboState() {
+        boolean isAssignedSelected = statusComboBox.getSelectedItem() == IssueStatus.ASSIGNED;
+        assigneeComboBox.setEnabled(isAssignedSelected && assignable);
+    }
+
     public void setIssueDetailActionListener(IssueDetailActionListener listener) {
         this.listener = listener;
     }
@@ -425,6 +499,6 @@ public class IssueDetailPanel extends BasePanel {
 
         void onIssueDeleteRequested(int issueId);
 
-        void onStatusChangeRequested(int issueId, IssueStatus newStatus, String comment);
+        void onStatusChangeRequested(int issueId, IssueStatus newStatus, Long assigneeId, String comment);
     }
 }
