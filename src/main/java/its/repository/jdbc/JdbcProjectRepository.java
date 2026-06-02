@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,8 +33,8 @@ public class JdbcProjectRepository implements ProjectRepository {
 
     private Project insert(Project project) {
         String sql = """
-            INSERT INTO projects (name, description)
-            VALUES (?, ?)
+            INSERT INTO projects (name, description, created_at)
+            VALUES (?, ?, ?)
             """;
 
         try (Connection connection = databaseManager.getConnection();
@@ -41,6 +42,7 @@ public class JdbcProjectRepository implements ProjectRepository {
 
             statement.setString(1, project.getName());
             statement.setString(2, project.getDescription());
+            statement.setString(3, project.getCreatedAt().toString());
             statement.executeUpdate();
 
             try (ResultSet keys = statement.getGeneratedKeys()) {
@@ -81,7 +83,7 @@ public class JdbcProjectRepository implements ProjectRepository {
     @Override
     public Optional<Project> findById(Long id) {
         String sql = """
-            SELECT id, name, description
+            SELECT id, name, description, created_at
             FROM projects
             WHERE id = ?
             """;
@@ -105,7 +107,7 @@ public class JdbcProjectRepository implements ProjectRepository {
     @Override
     public Optional<Project> findByName(String name) {
         String sql = """
-            SELECT id, name, description
+            SELECT id, name, description, created_at
             FROM projects
             WHERE name = ?
             """;
@@ -129,7 +131,7 @@ public class JdbcProjectRepository implements ProjectRepository {
     @Override
     public List<Project> findAll() {
         String sql = """
-            SELECT id, name, description
+            SELECT id, name, description, created_at
             FROM projects
             ORDER BY id
             """;
@@ -154,7 +156,8 @@ public class JdbcProjectRepository implements ProjectRepository {
         return new Project(
                 resultSet.getLong("id"),
                 resultSet.getString("name"),
-                resultSet.getString("description")
+                resultSet.getString("description"),
+                LocalDateTime.parse(resultSet.getString("created_at"))
         );
     }
 }

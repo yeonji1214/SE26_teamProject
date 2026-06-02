@@ -1,6 +1,7 @@
 package its.repository.jdbc;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -31,9 +32,12 @@ public class DatabaseInitializer {
                 CREATE TABLE IF NOT EXISTS projects (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL UNIQUE,
-                    description TEXT
+                    description TEXT,
+                    created_at TEXT NOT NULL
                 )
                 """);
+
+            ensureProjectCreatedAtColumn(connection);
 
             statement.execute("""
                 CREATE TABLE IF NOT EXISTS issues (
@@ -74,6 +78,36 @@ public class DatabaseInitializer {
 
         } catch (SQLException e) {
             throw new IllegalStateException("failed to initialize database schema", e);
+        }
+    }
+
+    private void ensureProjectCreatedAtColumn(Connection connection) throws SQLException {
+        if (!hasProjectCreatedAtColumn(connection)) {
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("ALTER TABLE projects ADD COLUMN created_at TEXT");
+            }
+        }
+
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("""
+                UPDATE projects
+                SET created_at = strftime('%Y-%m-%dT%H:%M:%f', 'now')
+                WHERE created_at IS NULL OR created_at = ''
+                """);
+        }
+    }
+
+    private boolean hasProjectCreatedAtColumn(Connection connection) throws SQLException {
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("PRAGMA table_info(projects)")) {
+
+            while (resultSet.next()) {
+                if ("created_at".equals(resultSet.getString("name"))) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

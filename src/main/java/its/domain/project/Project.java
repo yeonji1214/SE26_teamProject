@@ -1,15 +1,24 @@
 package its.domain.project;
 
+import java.time.LocalDateTime;
+import java.util.Objects;
+
 public class Project {
     private Long id;
     private String name;
     private String description;
+    private LocalDateTime createdAt;
 
     public Project(Long id, String name, String description) {
+        this(id, name, description, LocalDateTime.now());
+    }
+
+    public Project(Long id, String name, String description, LocalDateTime createdAt) {
         validateName(name);
         this.id = id;
         this.name = name;
         this.description = description == null ? "" : description;
+        this.createdAt = Objects.requireNonNull(createdAt, "createdAt must not be null");
     }
 
     public Long getId() {
@@ -22,6 +31,10 @@ public class Project {
 
     public String getDescription() {
         return description;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     public void setId(Long id) {
