@@ -124,6 +124,8 @@ public class IssuesPanel extends BasePanel {
                     if (listener != null) {
                         listener.onIssueSelected(issueId);
                     }
+
+                    SwingUtilities.invokeLater(() -> issueTable.clearSelection());
                 }
             }
         });

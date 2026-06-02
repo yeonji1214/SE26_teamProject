@@ -200,6 +200,11 @@ public class MainFrame extends JFrame {
                 System.out.println("[MainFrame] Issue Detail Back Requested");
                 contentCardLayout.show(contentAreaPanel, ISSUES_CARD);
                 navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
+
+                issuesPanel.onActivate();
+
+                contentAreaPanel.revalidate();
+                contentAreaPanel.repaint();
             }
 
             @Override
