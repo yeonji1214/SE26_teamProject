@@ -137,6 +137,9 @@ public class MainFrame extends JFrame {
         contentCardLayout = new CardLayout();
         contentAreaPanel = new JPanel(contentCardLayout);
 
+        ProjectsPanel projectsPanel = new ProjectsPanel();
+        projectsPanel.setProjectService(services.getProjectService());
+
         IssuesPanel issuesPanel = new IssuesPanel();
         CreateIssuePanel createIssuePanel = new CreateIssuePanel();
         IssueDetailPanel issueDetailPanel = new IssueDetailPanel();
@@ -217,7 +220,7 @@ public class MainFrame extends JFrame {
             }
         });
 
-        contentAreaPanel.add(new ProjectsPanel(), PROJECTS_CARD);
+        contentAreaPanel.add(projectsPanel, PROJECTS_CARD);
         contentAreaPanel.add(issuesPanel, ISSUES_CARD);
         contentAreaPanel.add(createIssuePanel, CREATE_ISSUE_CARD);
         contentAreaPanel.add(issueDetailPanel, ISSUE_DETAIL_CARD);

@@ -1,5 +1,7 @@
 package its.ui.gui.panel;
 
+import its.domain.project.Project;
+import its.service.ProjectService;
 import its.ui.gui.common.UIConstants;
 
 import javax.swing.*;
@@ -8,17 +10,22 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
 
-
 public class ProjectsPanel extends BasePanel {
     private JTable projectTable;
     private DefaultTableModel tableModel;
+    private ProjectService projectService;
 
     private static final String[] COLUMN_NAMES = {
             "Project Name",
-            "Admin",
+            "Description",
             "Created",
             "Status"
     };
+
+    public void setProjectService(ProjectService projectService) {
+        this.projectService = projectService;
+        refreshProjects();
+    }
 
     @Override
     protected void initComponents() {
@@ -32,7 +39,7 @@ public class ProjectsPanel extends BasePanel {
         add(Box.createHorizontalStrut(30), BorderLayout.EAST);
         add(Box.createVerticalStrut(50), BorderLayout.SOUTH);
 
-        loadDummyData();
+        refreshProjects();
     }
 
     private JPanel createTitlePanel() {
@@ -44,7 +51,7 @@ public class ProjectsPanel extends BasePanel {
         title.setFont(UIConstants.TITLE_FONT);
         title.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel subtitle = new JLabel("프로젝트 목록입니다.");
+        JLabel subtitle = new JLabel("백엔드 ProjectService에서 불러온 프로젝트 목록입니다.");
         subtitle.setFont(UIConstants.LABEL_FONT);
         subtitle.setForeground(Color.GRAY);
         subtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -66,7 +73,6 @@ public class ProjectsPanel extends BasePanel {
         };
 
         projectTable = new JTable(tableModel);
-
         setupTableStyle();
 
         JScrollPane scrollPane = new JScrollPane(projectTable);
@@ -88,20 +94,33 @@ public class ProjectsPanel extends BasePanel {
         projectTable.setRowHeight(30);
         projectTable.setFont(UIConstants.LABEL_FONT);
         projectTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
         projectTable.setGridColor(new Color(230, 230, 230));
-
         projectTable.setSelectionBackground(new Color(180, 180, 180));
 
         projectTable.getColumnModel().getColumn(0).setPreferredWidth(200);
-        projectTable.getColumnModel().getColumn(1).setPreferredWidth(100);
+        projectTable.getColumnModel().getColumn(1).setPreferredWidth(240);
         projectTable.getColumnModel().getColumn(2).setPreferredWidth(120);
         projectTable.getColumnModel().getColumn(3).setPreferredWidth(80);
 
         projectTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            public Component getTableCellRendererComponent(
+                    JTable table,
+                    Object value,
+                    boolean isSelected,
+                    boolean hasFocus,
+                    int row,
+                    int column
+            ) {
+                Component c = super.getTableCellRendererComponent(
+                        table,
+                        value,
+                        isSelected,
+                        hasFocus,
+                        row,
+                        column
+                );
+
                 if (!isSelected) {
                     c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(248, 248, 248));
                 }
@@ -115,21 +134,30 @@ public class ProjectsPanel extends BasePanel {
         });
     }
 
-    private void loadDummyData() {
-        // TODO: 나중에 Service 호출로 교체
+    public void refreshProjects() {
+        if (tableModel == null) {
+            return;
+        }
 
-        addProject("SE26 Team Project", "PL1", "2026-03-15", "Active");
-        addProject("AI Agent Competition", "PL2", "2026-05-15", "Active");
-        addProject("Old Project", "PL3", "2025-11-18", "Closed");
-    }
+        tableModel.setRowCount(0);
 
-    private void addProject(String name, String admin, String date, String status) {
-        tableModel.addRow(new Object[] {name, admin, date, status});
+        if (projectService == null) {
+            return;
+        }
+
+        for (Project project : projectService.getAllProjects()) {
+            tableModel.addRow(new Object[]{
+                    project.getName(),
+                    project.getDescription(),
+                    "-",
+                    "Active"
+            });
+        }
     }
 
     @Override
     public void onActivate() {
-        // TODO: 화면 활성화 시 데이터 새로고침
+        refreshProjects();
         projectTable.clearSelection();
 
         System.out.println("[ProjectsPanel] ProjectsPanel activated");
