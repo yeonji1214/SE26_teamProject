@@ -4,8 +4,10 @@ import its.domain.issue.Issue;
 import its.domain.issue.IssueStatus;
 import its.domain.issue.Priority;
 import its.domain.project.Project;
+import its.domain.user.Role;
 import its.domain.user.User;
 import its.service.ApplicationServices;
+import its.service.AssigneeRecommendation;
 import its.service.DemoDataSeeder;
 import its.service.ServiceFactory;
 import its.ui.gui.common.UIConstants;
@@ -28,6 +30,7 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 
 public class MainFrame extends JFrame {
@@ -149,6 +152,7 @@ public class MainFrame extends JFrame {
         createIssuePanel.setProjectService(services.getProjectService());
 
         IssueDetailPanel issueDetailPanel = new IssueDetailPanel();
+        issueDetailPanel.setIssueService(services.getIssueService());
 
         issuesPanel.setIssueActionListener(new IssuesPanel.IssueActionListener() {
             @Override
@@ -217,9 +221,7 @@ public class MainFrame extends JFrame {
 
             @Override
             public void onStatusChangeRequested(int issueId, IssueStatus status, String comment) {
-                System.out.println("[MainFrame] Issue Detail Change Requested");
-                System.out.println("[MainFrame] Selected Issue: " + issueId);
-                // 상태 변경 연결은 다음 커밋에서 처리한다.
+                handleStatusChange(issueId, status, comment, issuesPanel, issueDetailPanel);
             }
         });
 
@@ -274,6 +276,85 @@ public class MainFrame extends JFrame {
         } catch (Exception e) {
             showError("Issue Create Error", e);
         }
+    }
+
+    private void handleStatusChange(
+            int issueId,
+            IssueStatus status,
+            String comment,
+            IssuesPanel issuesPanel,
+            IssueDetailPanel issueDetailPanel
+    ) {
+        try {
+            if (currentUser == null) {
+                throw new IllegalStateException("current user is not set");
+            }
+
+            if (status == null) {
+                throw new IllegalArgumentException("status must be selected");
+            }
+
+            Long id = (long) issueId;
+            Issue updatedIssue;
+
+            switch (status) {
+                case ASSIGNED -> updatedIssue = services.getIssueService().assignIssue(
+                        id,
+                        currentUser.getId(),
+                        selectAssigneeId(id),
+                        comment
+                );
+                case FIXED -> updatedIssue = services.getIssueService().markFixed(
+                        id,
+                        currentUser.getId(),
+                        comment
+                );
+                case RESOLVED -> updatedIssue = services.getIssueService().resolveIssue(
+                        id,
+                        currentUser.getId(),
+                        comment
+                );
+                case CLOSED -> updatedIssue = services.getIssueService().closeIssue(
+                        id,
+                        currentUser.getId(),
+                        comment
+                );
+                case REOPENED -> updatedIssue = services.getIssueService().reopenIssue(
+                        id,
+                        currentUser.getId(),
+                        comment
+                );
+                case NEW -> throw new IllegalArgumentException("cannot change issue status back to NEW");
+                default -> throw new IllegalArgumentException("unsupported status: " + status);
+            }
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "상태가 변경되었습니다: " + updatedIssue.getStatus(),
+                    "Status Updated",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            issueDetailPanel.loadIssue(issueId);
+            issuesPanel.refreshIssues();
+        } catch (Exception e) {
+            showError("Status Change Error", e);
+        }
+    }
+
+    private Long selectAssigneeId(Long issueId) {
+        List<AssigneeRecommendation> recommendations =
+                services.getRecommendationService().recommendAssignees(issueId, 1);
+
+        if (!recommendations.isEmpty()) {
+            return recommendations.get(0).getAssignee().getId();
+        }
+
+        return services.getUserService().getAllUsers().stream()
+                .filter(user -> user.hasRole(Role.DEV))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("no DEV user exists"))
+                .getId();
     }
 
     private void validateIssueForm(String projectName, String title, String description) {
