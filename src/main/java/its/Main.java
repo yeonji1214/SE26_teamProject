@@ -28,7 +28,7 @@ public class Main {
         }
 
         if (args.length > 0 && "swing".equalsIgnoreCase(args[0])) {
-            startSwingApp();
+            startSwingApp(services);
             return;
         }
 
@@ -42,11 +42,11 @@ public class Main {
         System.out.println("Use Ctrl+C to stop the API server.");
     }
 
-    private static void startSwingApp() {
+    private static void startSwingApp(ApplicationServices services) {
         UIConfig.initialize();
 
         SwingUtilities.invokeLater(() -> {
-            MainFrame frame = new MainFrame();
+            MainFrame frame = new MainFrame(services);
             frame.setVisible(true);
         });
     }
