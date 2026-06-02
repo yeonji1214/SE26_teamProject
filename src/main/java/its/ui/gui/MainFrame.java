@@ -2,13 +2,36 @@ package its.ui.gui;
 
 import its.domain.issue.IssueStatus;
 import its.domain.issue.Priority;
+import its.service.ApplicationServices;
+import its.service.DemoDataSeeder;
+import its.service.ServiceFactory;
 import its.ui.gui.common.UIConstants;
-import its.ui.gui.panel.*;
+import its.ui.gui.panel.BasePanel;
+import its.ui.gui.panel.CreateIssuePanel;
+import its.ui.gui.panel.IssueDetailPanel;
+import its.ui.gui.panel.IssuesPanel;
+import its.ui.gui.panel.LoginPanel;
+import its.ui.gui.panel.NavigationPanel;
+import its.ui.gui.panel.ProjectsPanel;
+import its.ui.gui.panel.TitleBarPanel;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.nio.file.Path;
+import java.util.Objects;
 
 public class MainFrame extends JFrame {
+    private static final Path DATABASE_PATH = Path.of("issue-tracker.db");
+
+    private final ApplicationServices services;
+
     private CardLayout cardLayout;
     private JPanel contentPanel;
     private LoginPanel loginPanel;
@@ -29,6 +52,12 @@ public class MainFrame extends JFrame {
     private static final String STATISTICS_CARD = "STATISTICS";
 
     public MainFrame() {
+        this(createDefaultServices());
+    }
+
+    public MainFrame(ApplicationServices services) {
+        this.services = Objects.requireNonNull(services, "services must not be null");
+
         setTitle("ITS");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -37,12 +66,16 @@ public class MainFrame extends JFrame {
         initComponents();
     }
 
+    private static ApplicationServices createDefaultServices() {
+        ApplicationServices services = ServiceFactory.createWithSqliteDatabase(DATABASE_PATH);
+        new DemoDataSeeder(services).seedIfEmpty();
+        return services;
+    }
+
     private void initComponents() {
-        // Set CardLayout
         cardLayout = new CardLayout();
         contentPanel = new JPanel(cardLayout);
 
-        // Create LoginPanel, add Listener
         loginPanel = new LoginPanel();
         loginPanel.setLoginListener(username -> {
             currentUser = username;
@@ -60,7 +93,7 @@ public class MainFrame extends JFrame {
     }
 
     private void showLoginPanel() {
-        loginPanel.clear(); // Clear text fields
+        loginPanel.clear();
 
         if (mainPanel != null) {
             clearAllContentPanels();
@@ -83,7 +116,7 @@ public class MainFrame extends JFrame {
     private JPanel createMainPanel() {
         JPanel panel = new JPanel(new BorderLayout());
 
-        titleBarPanel  = new TitleBarPanel(currentUser);
+        titleBarPanel = new TitleBarPanel(currentUser);
         panel.add(titleBarPanel, BorderLayout.NORTH);
 
         navigationPanel = new NavigationPanel();
@@ -113,6 +146,7 @@ public class MainFrame extends JFrame {
                 navigationPanel.selectButton(NavigationPanel.NavigationListener.CREATE_ISSUES);
             }
 
+            @Override
             public void onIssueSelected(int issueId) {
                 issueDetailPanel.loadIssue(issueId);
                 contentCardLayout.show(contentAreaPanel, ISSUE_DETAIL_CARD);
@@ -206,7 +240,6 @@ public class MainFrame extends JFrame {
         }
     }
 
-    // Helper, 추후 삭제
     private JPanel createTempPanel(String label) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.LIGHT_GRAY);
@@ -220,12 +253,11 @@ public class MainFrame extends JFrame {
 
     private void clearAllContentPanels() {
         Component[] components = contentAreaPanel.getComponents();
+
         for (Component component : components) {
             if (component instanceof BasePanel) {
                 ((BasePanel) component).clear();
             }
         }
     }
-
-
 }
