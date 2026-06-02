@@ -22,6 +22,10 @@ const root = createBrowserRouter([
         element: <DashboardPage />,
       },
       {
+        path: "dashboard/:projectId",
+        element: <DashboardPage />,
+      },
+      {
         path: "login",
         element: <LoginPage />,
       },

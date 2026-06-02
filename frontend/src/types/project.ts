@@ -3,6 +3,7 @@ export interface Project {
   name: string;
   description: string;
   createdAt?: string;
+  issueCount?: number;
 }
 
 export interface ProjectCreateRequest {

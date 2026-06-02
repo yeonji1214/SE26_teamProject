@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createProject, getProjects } from "../api/projectApi";
+import { getIssues } from "../api/issueApi";
 import ProjectForm from "../components/ProjectForm";
 import ProjectTable, { type ProjectRow } from "../components/ProjectTable";
 import type { Project } from "../types/project";
@@ -21,8 +22,33 @@ function ProjectPage() {
     setErrorMessage("");
 
     try {
-      const data = await getProjects();
-      setProjects(data);
+      const [projectData, issueData] = await Promise.all([
+        getProjects(),
+        getIssues(),
+      ]);
+
+      const projectsWithIssueCount = projectData.map((project) => {
+        const issueCount = issueData.filter((issue) => {
+          const issueWithProject = issue as typeof issue & {
+            projectId?: number;
+            project?: {
+              id: number;
+            };
+          };
+
+          return (
+            issueWithProject.projectId === project.id ||
+            issueWithProject.project?.id === project.id
+          );
+        }).length;
+
+        return {
+          ...project,
+          issueCount,
+        };
+      });
+
+      setProjects(projectsWithIssueCount);
     } catch (error) {
       setErrorMessage(
         error instanceof Error
@@ -39,8 +65,8 @@ function ProjectPage() {
       id: project.id,
       name: project.name,
       description: project.description,
-      createdAt: "-",
-      issueCount: 0,
+      createdAt: project.createdAt ?? "-",
+      issueCount: project.issueCount ?? 0,
     }));
   }, [projects]);
 
@@ -50,7 +76,14 @@ function ProjectPage() {
   }) => {
     try {
       const createdProject = await createProject(request);
-      setProjects((prevProjects) => [createdProject, ...prevProjects]);
+
+      setProjects((prevProjects) => [
+        {
+          ...createdProject,
+          issueCount: 0,
+        },
+        ...prevProjects,
+      ]);
     } catch (error) {
       alert(
         error instanceof Error
@@ -60,8 +93,8 @@ function ProjectPage() {
     }
   };
 
-  const handleEnterProject = () => {
-    navigate("/dashboard");
+  const handleEnterProject = (projectId: number) => {
+    navigate(`/dashboard/${projectId}`);
   };
 
   return (

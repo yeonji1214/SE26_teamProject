@@ -12,6 +12,24 @@ export async function getIssues(): Promise<Issue[]> {
   return apiRequest<Issue[]>("/api/issues");
 }
 
+export async function getIssuesByProjectId(projectId: number): Promise<Issue[]> {
+  const issues = await getIssues();
+
+  return issues.filter((issue) => {
+    const issueWithProject = issue as Issue & {
+      projectId?: number;
+      project?: {
+        id: number;
+      };
+    };
+
+    return (
+      issueWithProject.projectId === projectId ||
+      issueWithProject.project?.id === projectId
+    );
+  });
+}
+
 export async function searchIssues(
   condition: IssueSearchCondition
 ): Promise<Issue[]> {

@@ -1,70 +1,98 @@
-import { useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import IssueSummaryCard from "../components/IssueSummaryCard";
 import RecentIssueTable, {
   type RecentIssueRow,
 } from "../components/RecentIssueTable";
-import type { IssuePriority, IssueStatus } from "../types/issue";
-
-interface DashboardIssue {
-  id: number;
-  title: string;
-  status: IssueStatus;
-  priority: IssuePriority;
-  assignee: string;
-  lastActivity: string;
-}
-
-const mockDashboardIssues: DashboardIssue[] = [
-  {
-    id: 1,
-    title: "로그인 후 이슈 목록이 보이지 않음",
-    status: "ASSIGNED",
-    priority: "MAJOR",
-    assignee: "dev1",
-    lastActivity: "2026-05-22",
-  },
-  {
-    id: 2,
-    title: "이슈 등록 시 priority 기본값 확인 필요",
-    status: "NEW",
-    priority: "MAJOR",
-    assignee: "-",
-    lastActivity: "2026-05-22",
-  },
-  {
-    id: 3,
-    title: "통계 페이지 월별 이슈 수 표시 오류",
-    status: "RESOLVED",
-    priority: "MINOR",
-    assignee: "dev2",
-    lastActivity: "2026-05-21",
-  },
-];
+import type { Issue } from "../types/issue";
+import type { Project } from "../types/project";
+import { getProjectById } from "../api/projectApi";
+import { getIssuesByProjectId } from "../api/issueApi";
 
 function DashboardPage() {
   const navigate = useNavigate();
+  const { projectId } = useParams();
+
+  const numericProjectId = Number(projectId ?? 1);
+
+  const [project, setProject] = useState<Project | null>(null);
+  const [issues, setIssues] = useState<Issue[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    if (!numericProjectId || Number.isNaN(numericProjectId)) {
+      setErrorMessage("잘못된 프로젝트 접근입니다.");
+      setIsLoading(false);
+      return;
+    }
+
+    const loadDashboardData = async () => {
+      setIsLoading(true);
+      setErrorMessage("");
+
+      try {
+        const [projectData, issueData] = await Promise.all([
+          getProjectById(numericProjectId),
+          getIssuesByProjectId(numericProjectId),
+        ]);
+
+        setProject(projectData);
+        setIssues(issueData);
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "대시보드 정보를 불러오지 못했습니다."
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, [numericProjectId]);
 
   const summary = useMemo(() => {
     return {
-      total: mockDashboardIssues.length,
-      new: mockDashboardIssues.filter((issue) => issue.status === "NEW").length,
-      assigned: mockDashboardIssues.filter(
-        (issue) => issue.status === "ASSIGNED"
-      ).length,
-      resolved: mockDashboardIssues.filter(
-        (issue) => issue.status === "RESOLVED"
-      ).length,
-      closed: mockDashboardIssues.filter((issue) => issue.status === "CLOSED")
-        .length,
+      total: issues.length,
+      new: issues.filter((issue) => issue.status === "NEW").length,
+      assigned: issues.filter((issue) => issue.status === "ASSIGNED").length,
+      resolved: issues.filter((issue) => issue.status === "RESOLVED").length,
+      closed: issues.filter((issue) => issue.status === "CLOSED").length,
     };
-  }, []);
+  }, [issues]);
 
   const myTasks = useMemo(() => {
-    return mockDashboardIssues.filter((issue) => issue.assignee === "dev1");
-  }, []);
+    return issues.filter((issue) => issue.assignee?.username === "dev1");
+  }, [issues]);
 
-  const recentIssues: RecentIssueRow[] = mockDashboardIssues.slice(0, 5);
+  const recentIssues: RecentIssueRow[] = useMemo(() => {
+    return issues.slice(0, 5).map((issue) => ({
+      id: issue.id,
+      title: issue.title,
+      status: issue.status,
+      priority: issue.priority,
+      assignee: issue.assignee?.username ?? "-",
+      lastActivity: issue.reportedDate ?? "-",
+    }));
+  }, [issues]);
+
+  if (isLoading) {
+    return (
+      <section className="dashboard-page">
+        <p>대시보드 정보를 불러오는 중입니다.</p>
+      </section>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <section className="dashboard-page">
+        <p className="error-message">{errorMessage}</p>
+      </section>
+    );
+  }
 
   return (
     <section className="dashboard-page">
@@ -72,7 +100,7 @@ function DashboardPage() {
         <h2>대시보드</h2>
 
         <button type="button" className="project-chip">
-          Project 1
+          {project?.name ?? `Project ${numericProjectId}`}
         </button>
       </div>
 
@@ -91,7 +119,10 @@ function DashboardPage() {
           {myTasks.length > 0 ? (
             <ul className="my-task-list">
               {myTasks.map((issue) => (
-                <li key={issue.id} onClick={() => navigate(`/issues/${issue.id}`)}>
+                <li
+                  key={issue.id}
+                  onClick={() => navigate(`/issues/${issue.id}`)}
+                >
                   <strong>#{issue.id}</strong>
                   <span>{issue.title}</span>
                 </li>
