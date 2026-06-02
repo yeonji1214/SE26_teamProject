@@ -92,18 +92,12 @@ public class NavigationPanel extends JPanel {
 
     private void attachListener(JButton button, String menuName) {
         button.addActionListener(e -> {
-            System.out.println("[NavigationPanel] Button clicked: " + menuName);
-
             if (!NavigationListener.LOGOUT.equals(menuName)) {
                 selectButton(button);
             }
 
             if (listener != null) {
-                System.out.println("[NavigationPanel] Listener is set, calling onMenuSelected");
                 listener.onMenuSelected(menuName);
-            }
-            else {
-                System.out.println("[NavigationPanel] Warning: Listener is null");
             }
         });
     }

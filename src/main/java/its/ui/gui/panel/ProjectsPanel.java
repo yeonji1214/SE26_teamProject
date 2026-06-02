@@ -277,8 +277,6 @@ public class ProjectsPanel extends BasePanel {
     public void onActivate() {
         refreshProjects();
         projectTable.clearSelection();
-
-        System.out.println("[ProjectsPanel] ProjectsPanel activated");
     }
 
     @Override

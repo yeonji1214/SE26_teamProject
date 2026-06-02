@@ -109,9 +109,6 @@ public class MainFrame extends JFrame {
     }
 
     private void showMainPanel() {
-        System.out.println("[MainFrame] Switching to MAIN screen ...");
-        System.out.println("[MainFrame] Current User: " + currentUsername());
-
         if (titleBarPanel != null) {
             titleBarPanel.setUsername(currentUsername());
         }
@@ -152,8 +149,6 @@ public class MainFrame extends JFrame {
 
 
         navigationPanel.setNavigationListener(menuName -> {
-            System.out.println("[MainFrame] Menu Selected: " + menuName);
-
             if (menuName.equals("LOGOUT")) {
                 handleLogout();
             } else {
@@ -190,7 +185,6 @@ public class MainFrame extends JFrame {
         createIssuePanel.setCreateIssueActionListener(new CreateIssuePanel.CreateIssueActionListener() {
             @Override
             public void onCancelRequested() {
-                System.out.println("[MainFrame] Create Issue Cancel Requested");
                 contentCardLayout.show(contentAreaPanel, ISSUES_CARD);
                 navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
 
@@ -206,7 +200,6 @@ public class MainFrame extends JFrame {
         issueDetailPanel.setIssueDetailActionListener(new IssueDetailPanel.IssueDetailActionListener() {
             @Override
             public void onBackRequested() {
-                System.out.println("[MainFrame] Issue Detail Back Requested");
                 contentCardLayout.show(contentAreaPanel, ISSUES_CARD);
                 navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
 
