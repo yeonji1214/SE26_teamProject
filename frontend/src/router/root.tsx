@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import RootLayout from "../layout/RootLayout";
 import LoginPage from "../pages/LoginPage";
 import ProjectPage from "../pages/ProjectPage";
@@ -7,49 +7,59 @@ import IssueCreatePage from "../pages/IssueCreatePage";
 import IssueDetailPage from "../pages/IssueDetailPage";
 import StatisticsPage from "../pages/StatisticsPage";
 import DashboardPage from "../pages/DashboardPage";
+import ProtectedRoute from "./ProtectedRoute";
 
 const root = createBrowserRouter([
   {
-    path: "/",
-    element: <RootLayout />,
+    path: "/login",
+    element: <LoginPage />,
+  },
+  {
+    element: <ProtectedRoute />,
     children: [
       {
-        index: true,
-        element: <LoginPage />,
-      },
-      {
-        path: "dashboard",
-        element: <DashboardPage />,
-      },
-      {
-        path: "dashboard/:projectId",
-        element: <DashboardPage />,
-      },
-      {
-        path: "login",
-        element: <LoginPage />,
-      },
-      {
-        path: "projects",
-        element: <ProjectPage />,
-      },
-      {
-        path: "issues",
-        element: <IssueListPage />,
-      },
-      {
-        path: "issues/new",
-        element: <IssueCreatePage />,
-      },
-      {
-        path: "issues/:issueId",
-        element: <IssueDetailPage />,
-      },
-      {
-        path: "statistics",
-        element: <StatisticsPage />,
+        path: "/",
+        element: <RootLayout />,
+        children: [
+          {
+            index: true,
+            element: <Navigate to="/dashboard" replace />,
+          },
+          {
+            path: "dashboard",
+            element: <DashboardPage />,
+          },
+          {
+            path: "dashboard/:projectId",
+            element: <DashboardPage />,
+          },
+          {
+            path: "projects",
+            element: <ProjectPage />,
+          },
+          {
+            path: "issues",
+            element: <IssueListPage />,
+          },
+          {
+            path: "issues/new",
+            element: <IssueCreatePage />,
+          },
+          {
+            path: "issues/:issueId",
+            element: <IssueDetailPage />,
+          },
+          {
+            path: "statistics",
+            element: <StatisticsPage />,
+          },
+        ],
       },
     ],
+  },
+  {
+    path: "*",
+    element: <Navigate to="/dashboard" replace />,
   },
 ]);
 
