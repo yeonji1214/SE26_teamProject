@@ -118,7 +118,6 @@ function StatisticsPage() {
       <div className="statistics-header">
         <div>
           <h2>통계</h2>
-          <p>프로젝트별 이슈 발생 현황과 처리 추이를 확인합니다.</p>
         </div>
 
         <div className="statistics-project-selector">

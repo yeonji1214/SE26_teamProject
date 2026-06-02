@@ -157,7 +157,6 @@ function IssueListPage() {
       <div className="issue-list-header">
         <div>
           <h2>이슈 목록</h2>
-          <p>백엔드 API에서 불러온 이슈 목록을 조회합니다.</p>
         </div>
 
         <button

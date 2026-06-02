@@ -6,6 +6,24 @@ import ProjectForm from "../components/ProjectForm";
 import ProjectTable, { type ProjectRow } from "../components/ProjectTable";
 import type { Project } from "../types/project";
 
+function formatCreatedAt(createdAt?: string | null) {
+  if (!createdAt) {
+    return "-";
+  }
+
+  const date = new Date(createdAt);
+
+  if (Number.isNaN(date.getTime())) {
+    return createdAt;
+  }
+
+  return date.toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+}
+
 function ProjectPage() {
   const navigate = useNavigate();
 
@@ -65,7 +83,7 @@ function ProjectPage() {
       id: project.id,
       name: project.name,
       description: project.description,
-      createdAt: project.createdAt ?? "-",
+      createdAt: formatCreatedAt(project.createdAt),
       issueCount: project.issueCount ?? 0,
     }));
   }, [projects]);
@@ -102,7 +120,6 @@ function ProjectPage() {
       <div className="project-page-header">
         <div>
           <h2>프로젝트</h2>
-          <p>백엔드 API에서 프로젝트 목록을 불러옵니다.</p>
         </div>
       </div>
 
