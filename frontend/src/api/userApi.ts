@@ -1,62 +1,28 @@
-import type { User } from "../types/user";
-
-const mockUsers: User[] = [
-  {
-    id: 1,
-    username: "admin",
-    displayName: "Admin",
-    role: "ADMIN",
-  },
-  {
-    id: 2,
-    username: "pl1",
-    displayName: "PL 1",
-    role: "PL",
-  },
-  {
-    id: 3,
-    username: "pl2",
-    displayName: "PL 2",
-    role: "PL",
-  },
-  {
-    id: 4,
-    username: "dev1",
-    displayName: "Developer 1",
-    role: "DEV",
-  },
-  {
-    id: 5,
-    username: "dev2",
-    displayName: "Developer 2",
-    role: "DEV",
-  },
-  {
-    id: 6,
-    username: "tester1",
-    displayName: "Tester 1",
-    role: "TESTER",
-  },
-];
+import { apiRequest } from "./apiClient";
+import type { LoginRequest, User } from "../types/user";
 
 export async function getUsers(): Promise<User[]> {
-  return mockUsers;
+  return apiRequest<User[]>("/api/users");
 }
 
 export async function getUserById(userId: number): Promise<User> {
-  const user = mockUsers.find((item) => item.id === userId);
-
-  if (!user) {
-    throw new Error("사용자를 찾을 수 없습니다.");
-  }
-
-  return user;
+  return apiRequest<User>(`/api/users/${userId}`);
 }
 
 export async function loginAsUser(userId: number): Promise<User> {
-  return getUserById(userId);
+  const request: LoginRequest = { userId };
+
+  return apiRequest<User>("/api/login", {
+    method: "POST",
+    body: request,
+  });
 }
 
+/**
+ * @deprecated
+ * 기존 mock 기반 개발 코드와의 호환성을 위해 잠시 남겨두었소이다.
+ * 새 UI 코드는 getUsers()를 사용해야 함.
+ */
 export function getMockUsersForDev(): User[] {
-  return mockUsers;
+  return [];
 }
