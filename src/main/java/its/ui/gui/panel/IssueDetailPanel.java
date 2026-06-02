@@ -6,6 +6,7 @@ import its.domain.issue.IssueStatus;
 import its.domain.user.Role;
 import its.domain.user.User;
 import its.service.IssueService;
+import its.service.RecommendationService;
 import its.service.UserService;
 import its.ui.gui.common.UIConstants;
 
@@ -41,6 +42,13 @@ public class IssueDetailPanel extends BasePanel {
     private IssueDetailActionListener listener;
     private IssueService issueService;
     private UserService userService;
+    private RecommendationService recommendationService;
+
+    private JPanel recommendationPanel;
+    private JLabel recAssigneeLabel;
+    private JLabel recScoreLabel;
+    private JLabel recEvidenceLabel;
+    private JLabel recKeywordLabel;
 
     private int currentIssueId;
 
@@ -52,6 +60,10 @@ public class IssueDetailPanel extends BasePanel {
 
     public void setUserService(UserService userService) {
         this.userService = userService;
+    }
+
+    public void setRecommendationService(RecommendationService recommendationService) {
+        this.recommendationService = recommendationService;
     }
 
     public void setAssignable(boolean assignable) {
@@ -89,9 +101,9 @@ public class IssueDetailPanel extends BasePanel {
         commentTextArea.setLineWrap(true);
         commentTextArea.setWrapStyleWord(true);
 
+        recommendationPanel = new JPanel();
+
         commentListPanel = new JPanel();
-        commentListPanel.setLayout(new BoxLayout(commentListPanel, BoxLayout.Y_AXIS));
-        commentListPanel.setBackground(UIConstants.CARD_COLOR);
 
         mainScrollPane = new JScrollPane(createContentPanel());
         mainScrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -215,14 +227,14 @@ public class IssueDetailPanel extends BasePanel {
         gbc.insets = new Insets(0, 0, 0, 10);
 
         JPanel infoCard = createInfoCard();
-        infoCard.setPreferredSize(new Dimension(0, infoCard.getPreferredSize().height));
+        //infoCard.setPreferredSize(new Dimension(0, infoCard.getPreferredSize().height));
         panel.add(infoCard, gbc);
 
         gbc.weightx = 0.5;
         gbc.gridx = 1;
 
         JPanel descriptionCard = createDescriptionCard();
-        descriptionCard.setPreferredSize(new Dimension(0, descriptionCard.getPreferredSize().height));
+        //descriptionCard.setPreferredSize(new Dimension(0, descriptionCard.getPreferredSize().height));
         panel.add(descriptionCard, gbc);
 
         gbc.weightx = 0.25;
@@ -230,7 +242,7 @@ public class IssueDetailPanel extends BasePanel {
         gbc.insets = new Insets(0, 0, 0, 0);
 
         JPanel actionCard = createActionCard();
-        actionCard.setPreferredSize(new Dimension(0, actionCard.getPreferredSize().height));
+        //actionCard.setPreferredSize(new Dimension(0, actionCard.getPreferredSize().height));
         panel.add(actionCard, gbc);
 
         return panel;
@@ -245,6 +257,8 @@ public class IssueDetailPanel extends BasePanel {
         title.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         panel.add(title, BorderLayout.NORTH);
 
+        commentListPanel.setLayout(new BoxLayout(commentListPanel, BoxLayout.Y_AXIS));
+        commentListPanel.setBackground(UIConstants.CARD_COLOR);
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setBackground(UIConstants.CARD_COLOR);
         wrapper.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
@@ -256,7 +270,14 @@ public class IssueDetailPanel extends BasePanel {
     }
 
     private JPanel createInfoCard() {
-        JPanel card = new JPanel();
+        JPanel card = new JPanel() {
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension d = super.getPreferredSize();
+                d.width = 0; // 가로는 0으로 속여서 GridBagLayout 1:2:1 비율을 완벽히 유지
+                return d;    // 세로는 내용물이 늘어나는 대로 유연하게 커짐
+            }
+        };
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBackground(UIConstants.CARD_COLOR);
         card.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
@@ -285,7 +306,14 @@ public class IssueDetailPanel extends BasePanel {
     }
 
     private JPanel createDescriptionCard() {
-        JPanel card = new JPanel();
+        JPanel card = new JPanel() {
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension d = super.getPreferredSize();
+                d.width = 0; // 가로는 0으로 속여서 GridBagLayout 1:2:1 비율을 완벽히 유지
+                return d;    // 세로는 내용물이 늘어나는 대로 유연하게 커짐
+            }
+        };
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBackground(UIConstants.CARD_COLOR);
         card.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
@@ -305,7 +333,14 @@ public class IssueDetailPanel extends BasePanel {
     }
 
     private JPanel createActionCard() {
-        JPanel card = new JPanel();
+        JPanel card = new JPanel() {
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension d = super.getPreferredSize();
+                d.width = 0; // 가로는 0으로 속여서 GridBagLayout 1:2:1 비율을 완벽히 유지
+                return d;    // 세로는 내용물이 늘어나는 대로 유연하게 커짐
+            }
+        };
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBackground(UIConstants.CARD_COLOR);
         card.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
@@ -349,6 +384,37 @@ public class IssueDetailPanel extends BasePanel {
         card.add(assigneeComboBox);
         card.add(Box.createVerticalStrut(10));
 
+        recommendationPanel.setLayout(new BoxLayout(recommendationPanel, BoxLayout.Y_AXIS));
+        recommendationPanel.setBackground(UIConstants.BACKGROUND_COLOR);
+        recommendationPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(180, 180, 180)),
+                BorderFactory.createEmptyBorder(8, 8, 8, 8)
+        ));
+        recommendationPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        recAssigneeLabel = new JLabel("추천 담당자: -");
+        recScoreLabel = new JLabel("추천 점수: -");
+        recEvidenceLabel = new JLabel("근거 이슈: -");
+        recKeywordLabel = new JLabel("매칭 키워드: -");
+
+        recAssigneeLabel.setFont(UIConstants.LABEL_FONT);
+        recScoreLabel.setFont(UIConstants.LABEL_FONT);
+        recEvidenceLabel.setFont(UIConstants.LABEL_FONT);
+        recKeywordLabel.setFont(UIConstants.LABEL_FONT);
+
+        recommendationPanel.add(recAssigneeLabel);
+        recommendationPanel.add(Box.createVerticalStrut(2));
+        recommendationPanel.add(recScoreLabel);
+        recommendationPanel.add(Box.createVerticalStrut(2));
+        recommendationPanel.add(recEvidenceLabel);
+        recommendationPanel.add(Box.createVerticalStrut(2));
+        recommendationPanel.add(recKeywordLabel);
+
+        recommendationPanel.setVisible(false);
+
+        card.add(recommendationPanel);
+        card.add(Box.createVerticalStrut(10));
+
         JLabel commentLabel = new JLabel("코멘트");
         commentLabel.setFont(UIConstants.LABEL_FONT);
         commentLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -357,7 +423,8 @@ public class IssueDetailPanel extends BasePanel {
 
         JScrollPane scrollPane = new JScrollPane(commentTextArea);
         scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
-        scrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
+        scrollPane.setPreferredSize(new Dimension(0, 120));
+        scrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
         card.add(scrollPane);
         card.add(Box.createVerticalStrut(10));
 
@@ -450,6 +517,12 @@ public class IssueDetailPanel extends BasePanel {
         assigneeComboBox.setSelectedItem(issue.getAssignee());
         updateAssigneeComboState();
 
+        if (issue.getAssignee() == null && this.assignable) {
+            refreshRecommendation(issueId);
+        } else {
+            recommendationPanel.setVisible(false);
+        }
+
         commentTextArea.setText("");
 
         refreshComments(issueId);
@@ -486,6 +559,42 @@ public class IssueDetailPanel extends BasePanel {
     private void updateAssigneeComboState() {
         boolean isAssignedSelected = statusComboBox.getSelectedItem() == IssueStatus.ASSIGNED;
         assigneeComboBox.setEnabled(isAssignedSelected && assignable);
+    }
+
+    private void refreshRecommendation(int issueId) {
+        recommendationPanel.setVisible(false);
+
+        if (recommendationService == null) {
+            return;
+        }
+
+        java.util.List<its.service.AssigneeRecommendation> recs = recommendationService.recommendAssignees((long) issueId, 1);
+
+        if (recs != null && !recs.isEmpty()) {
+            its.service.AssigneeRecommendation rec = recs.get(0);
+            User recommendedUser = rec.getAssignee();
+
+            recAssigneeLabel.setText("추천 담당자: " + rec.getAssignee().getUsername());
+            recScoreLabel.setText("추천 점수: " + rec.getScore());
+
+            String evidence = rec.getEvidenceIssueTitles().isEmpty() ? "-" : String.join(", ", rec.getEvidenceIssueTitles());
+            recEvidenceLabel.setText("<html>근거 이슈: " + evidence + "</html>");
+
+            String keywords = rec.getMatchedTerms().isEmpty() ? "-" : String.join(", ", rec.getMatchedTerms());
+            recKeywordLabel.setText("<html>매칭 키워드: " + keywords + "</html>");
+
+            recommendationPanel.setVisible(true);
+
+            for (int i = 0; i < assigneeComboBox.getItemCount(); i++) {
+                User comboUser = assigneeComboBox.getItemAt(i);
+                if (comboUser != null && comboUser.getId().equals(recommendedUser.getId())) {
+                    assigneeComboBox.setSelectedIndex(i);
+                    break;
+                }
+            }
+        } else {
+            recommendationPanel.setVisible(false);
+        }
     }
 
     public void setIssueDetailActionListener(IssueDetailActionListener listener) {

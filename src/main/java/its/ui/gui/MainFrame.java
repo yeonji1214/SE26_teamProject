@@ -151,6 +151,7 @@ public class MainFrame extends JFrame {
         IssueDetailPanel issueDetailPanel = new IssueDetailPanel();
         issueDetailPanel.setIssueService(services.getIssueService());
         issueDetailPanel.setUserService(services.getUserService());
+        issueDetailPanel.setRecommendationService(services.getRecommendationService());
 
         StatisticsPanel statisticsPanel = new StatisticsPanel();
         statisticsPanel.setStatisticsService(services.getStatisticsService());
