@@ -10,7 +10,6 @@ import its.service.ApplicationServices;
 import its.service.AssigneeRecommendation;
 import its.service.DemoDataSeeder;
 import its.service.ServiceFactory;
-import its.ui.gui.common.UIConstants;
 import its.ui.gui.panel.BasePanel;
 import its.ui.gui.panel.CreateIssuePanel;
 import its.ui.gui.panel.IssueDetailPanel;
@@ -18,16 +17,14 @@ import its.ui.gui.panel.IssuesPanel;
 import its.ui.gui.panel.LoginPanel;
 import its.ui.gui.panel.NavigationPanel;
 import its.ui.gui.panel.ProjectsPanel;
+import its.ui.gui.panel.StatisticsPanel;
 import its.ui.gui.panel.TitleBarPanel;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.nio.file.Path;
 import java.util.List;
@@ -154,6 +151,9 @@ public class MainFrame extends JFrame {
         IssueDetailPanel issueDetailPanel = new IssueDetailPanel();
         issueDetailPanel.setIssueService(services.getIssueService());
 
+        StatisticsPanel statisticsPanel = new StatisticsPanel();
+        statisticsPanel.setStatisticsService(services.getStatisticsService());
+
         issuesPanel.setIssueActionListener(new IssuesPanel.IssueActionListener() {
             @Override
             public void onCreateIssueRequested() {
@@ -187,7 +187,7 @@ public class MainFrame extends JFrame {
 
             @Override
             public void onSaveRequested(String project, String title, String description, Priority priority) {
-                handleCreateIssue(project, title, description, priority, issuesPanel, createIssuePanel);
+                handleCreateIssue(project, title, description, priority, issuesPanel, createIssuePanel, statisticsPanel);
             }
         });
 
@@ -221,7 +221,7 @@ public class MainFrame extends JFrame {
 
             @Override
             public void onStatusChangeRequested(int issueId, IssueStatus status, String comment) {
-                handleStatusChange(issueId, status, comment, issuesPanel, issueDetailPanel);
+                handleStatusChange(issueId, status, comment, issuesPanel, issueDetailPanel, statisticsPanel);
             }
         });
 
@@ -229,7 +229,7 @@ public class MainFrame extends JFrame {
         contentAreaPanel.add(issuesPanel, ISSUES_CARD);
         contentAreaPanel.add(createIssuePanel, CREATE_ISSUE_CARD);
         contentAreaPanel.add(issueDetailPanel, ISSUE_DETAIL_CARD);
-        contentAreaPanel.add(createTempPanel("Statistics"), STATISTICS_CARD);
+        contentAreaPanel.add(statisticsPanel, STATISTICS_CARD);
 
         panel.add(contentAreaPanel, BorderLayout.CENTER);
 
@@ -242,7 +242,8 @@ public class MainFrame extends JFrame {
             String description,
             Priority priority,
             IssuesPanel issuesPanel,
-            CreateIssuePanel createIssuePanel
+            CreateIssuePanel createIssuePanel,
+            StatisticsPanel statisticsPanel
     ) {
         try {
             if (currentUser == null) {
@@ -270,6 +271,7 @@ public class MainFrame extends JFrame {
 
             createIssuePanel.clear();
             issuesPanel.refreshIssues();
+            statisticsPanel.refreshStatistics();
 
             contentCardLayout.show(contentAreaPanel, ISSUES_CARD);
             navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
@@ -283,7 +285,8 @@ public class MainFrame extends JFrame {
             IssueStatus status,
             String comment,
             IssuesPanel issuesPanel,
-            IssueDetailPanel issueDetailPanel
+            IssueDetailPanel issueDetailPanel,
+            StatisticsPanel statisticsPanel
     ) {
         try {
             if (currentUser == null) {
@@ -337,6 +340,7 @@ public class MainFrame extends JFrame {
 
             issueDetailPanel.loadIssue(issueId);
             issuesPanel.refreshIssues();
+            statisticsPanel.refreshStatistics();
         } catch (Exception e) {
             showError("Status Change Error", e);
         }
@@ -390,17 +394,6 @@ public class MainFrame extends JFrame {
             currentUser = null;
             showLoginPanel();
         }
-    }
-
-    private JPanel createTempPanel(String label) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.LIGHT_GRAY);
-
-        JLabel titleLabel = new JLabel(label + " - Coming Soon", SwingConstants.CENTER);
-        titleLabel.setFont(UIConstants.TITLE_FONT);
-        panel.add(titleLabel, BorderLayout.CENTER);
-
-        return panel;
     }
 
     private void clearAllContentPanels() {
