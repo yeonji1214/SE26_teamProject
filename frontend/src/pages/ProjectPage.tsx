@@ -1,35 +1,63 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { createProject, getProjects } from "../api/projectApi";
 import ProjectForm from "../components/ProjectForm";
 import ProjectTable, { type ProjectRow } from "../components/ProjectTable";
-
-const initialProjects: ProjectRow[] = [
-  {
-    id: 1,
-    name: "project1",
-    description: "이슈 관리 시스템 데모 프로젝트",
-    createdAt: "2026-05-22",
-    issueCount: 3,
-  },
-];
+import type { Project } from "../types/project";
 
 function ProjectPage() {
   const navigate = useNavigate();
-  const [projects, setProjects] = useState<ProjectRow[]>(initialProjects);
 
-  const handleCreateProject = (request: {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  const loadProjects = async () => {
+    setIsLoading(true);
+    setErrorMessage("");
+
+    try {
+      const data = await getProjects();
+      setProjects(data);
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "프로젝트 목록을 불러오지 못했습니다."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const projectRows: ProjectRow[] = useMemo(() => {
+    return projects.map((project) => ({
+      id: project.id,
+      name: project.name,
+      description: project.description,
+      createdAt: "-",
+      issueCount: 0,
+    }));
+  }, [projects]);
+
+  const handleCreateProject = async (request: {
     name: string;
     description: string;
   }) => {
-    const newProject: ProjectRow = {
-      id: Date.now(),
-      name: request.name,
-      description: request.description,
-      createdAt: new Date().toISOString().slice(0, 10),
-      issueCount: 0,
-    };
-
-    setProjects((prevProjects) => [newProject, ...prevProjects]);
+    try {
+      const createdProject = await createProject(request);
+      setProjects((prevProjects) => [createdProject, ...prevProjects]);
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "프로젝트 생성 중 오류가 발생했습니다."
+      );
+    }
   };
 
   const handleEnterProject = () => {
@@ -37,18 +65,22 @@ function ProjectPage() {
   };
 
   return (
-    <section className="project-page">
-      <div className="project-page-header">
-        <h2>프로젝트</h2>
-
-        <button type="button" className="primary-button">
-          + 프로젝트 추가
-        </button>
+    <section className="page-section">
+      <div className="page-header-row">
+        <div>
+          <h2>프로젝트</h2>
+          <p>백엔드 API에서 프로젝트 목록을 불러옵니다.</p>
+        </div>
       </div>
 
-      <ProjectTable projects={projects} onEnterProject={handleEnterProject} />
-
       <ProjectForm onSubmit={handleCreateProject} />
+
+      {isLoading && <p>프로젝트 목록을 불러오는 중입니다.</p>}
+      {errorMessage && <p className="error-message">{errorMessage}</p>}
+
+      {!isLoading && !errorMessage && (
+        <ProjectTable projects={projectRows} onEnterProject={handleEnterProject} />
+      )}
     </section>
   );
 }
