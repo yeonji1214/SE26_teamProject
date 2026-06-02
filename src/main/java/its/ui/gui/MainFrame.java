@@ -127,20 +127,8 @@ public class MainFrame extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
 
         titleBarPanel = new TitleBarPanel(currentUsername());
-        panel.add(titleBarPanel, BorderLayout.NORTH);
 
         navigationPanel = new NavigationPanel();
-        navigationPanel.setNavigationListener(menuName -> {
-            System.out.println("[MainFrame] Menu Selected: " + menuName);
-
-            if (menuName.equals("LOGOUT")) {
-                handleLogout();
-            } else {
-                contentCardLayout.show(contentAreaPanel, menuName);
-            }
-        });
-
-        panel.add(navigationPanel, BorderLayout.WEST);
 
         contentCardLayout = new CardLayout();
         contentAreaPanel = new JPanel(contentCardLayout);
@@ -162,10 +150,29 @@ public class MainFrame extends JFrame {
         StatisticsPanel statisticsPanel = new StatisticsPanel();
         statisticsPanel.setStatisticsService(services.getStatisticsService());
 
+
+        navigationPanel.setNavigationListener(menuName -> {
+            System.out.println("[MainFrame] Menu Selected: " + menuName);
+
+            if (menuName.equals("LOGOUT")) {
+                handleLogout();
+            } else {
+                contentCardLayout.show(contentAreaPanel, menuName);
+            }
+
+            switch (menuName) {
+                case PROJECTS_CARD -> projectsPanel.onActivate();
+                case ISSUES_CARD -> issuesPanel.onActivate();
+                case CREATE_ISSUE_CARD -> createIssuePanel.onActivate();
+                case STATISTICS_CARD -> statisticsPanel.onActivate();
+            }
+        });
+
         issuesPanel.setIssueActionListener(new IssuesPanel.IssueActionListener() {
             @Override
             public void onCreateIssueRequested() {
-                createIssuePanel.clear();
+                createIssuePanel.onActivate();
+
                 contentCardLayout.show(contentAreaPanel, CREATE_ISSUE_CARD);
                 navigationPanel.selectButton(NavigationPanel.NavigationListener.CREATE_ISSUES);
             }
@@ -186,6 +193,8 @@ public class MainFrame extends JFrame {
                 System.out.println("[MainFrame] Create Issue Cancel Requested");
                 contentCardLayout.show(contentAreaPanel, ISSUES_CARD);
                 navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
+
+                issuesPanel.onActivate();
             }
 
             @Override
@@ -219,6 +228,8 @@ public class MainFrame extends JFrame {
         contentAreaPanel.add(issueDetailPanel, ISSUE_DETAIL_CARD);
         contentAreaPanel.add(statisticsPanel, STATISTICS_CARD);
 
+        panel.add(titleBarPanel, BorderLayout.NORTH);
+        panel.add(navigationPanel, BorderLayout.WEST);
         panel.add(contentAreaPanel, BorderLayout.CENTER);
 
         return panel;
