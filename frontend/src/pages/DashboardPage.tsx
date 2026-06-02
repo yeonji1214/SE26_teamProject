@@ -4,10 +4,12 @@ import IssueSummaryCard from "../components/IssueSummaryCard";
 import RecentIssueTable, {
   type RecentIssueRow,
 } from "../components/RecentIssueTable";
+import { getIssuesByProjectId } from "../api/issueApi";
+import { getProjectById } from "../api/projectApi";
 import type { Issue } from "../types/issue";
 import type { Project } from "../types/project";
-import { getProjectById } from "../api/projectApi";
-import { getIssuesByProjectId } from "../api/issueApi";
+import type { User } from "../types/user";
+import { AUTH_CHANGE_EVENT, getCurrentUser } from "../utils/authStorage";
 
 function DashboardPage() {
   const navigate = useNavigate();
@@ -17,8 +19,27 @@ function DashboardPage() {
 
   const [project, setProject] = useState<Project | null>(null);
   const [issues, setIssues] = useState<Issue[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(() =>
+    getCurrentUser()
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const syncCurrentUser = () => {
+      setCurrentUser(getCurrentUser());
+    };
+
+    syncCurrentUser();
+
+    window.addEventListener(AUTH_CHANGE_EVENT, syncCurrentUser);
+    window.addEventListener("storage", syncCurrentUser);
+
+    return () => {
+      window.removeEventListener(AUTH_CHANGE_EVENT, syncCurrentUser);
+      window.removeEventListener("storage", syncCurrentUser);
+    };
+  }, []);
 
   useEffect(() => {
     if (!numericProjectId || Number.isNaN(numericProjectId)) {
@@ -64,8 +85,81 @@ function DashboardPage() {
   }, [issues]);
 
   const myTasks = useMemo(() => {
-    return issues.filter((issue) => issue.assignee?.username === "dev1");
-  }, [issues]);
+    if (!currentUser) {
+      return [];
+    }
+
+    if (currentUser.role === "ADMIN") {
+      return issues;
+    }
+
+    if (currentUser.role === "PL") {
+      return issues.filter(
+        (issue) => issue.status === "NEW" || issue.status === "RESOLVED"
+      );
+    }
+
+    if (currentUser.role === "DEV") {
+      return issues.filter(
+        (issue) =>
+          issue.assignee?.id === currentUser.id &&
+          issue.status === "ASSIGNED"
+      );
+    }
+
+    if (currentUser.role === "TESTER") {
+      return issues.filter(
+        (issue) =>
+          issue.reporter.id === currentUser.id && issue.status === "FIXED"
+      );
+    }
+
+    return [];
+  }, [issues, currentUser]);
+
+  const myTaskTitle = useMemo(() => {
+    if (!currentUser) {
+      return "내 할 일";
+    }
+
+    if (currentUser.role === "ADMIN") {
+      return "전체 이슈";
+    }
+
+    if (currentUser.role === "PL") {
+      return "검토할 이슈";
+    }
+
+    if (currentUser.role === "DEV") {
+      return "내 할 일";
+    }
+
+    if (currentUser.role === "TESTER") {
+      return "확인할 이슈";
+    }
+
+    return "내 할 일";
+  }, [currentUser]);
+
+  const emptyTaskMessage = useMemo(() => {
+    if (!currentUser) {
+      return "로그인 후 확인할 수 있습니다.";
+    }
+
+    if (currentUser.role === "PL") {
+      return "검토할 이슈가 없습니다.";
+    }
+
+    if (currentUser.role === "TESTER") {
+      return "확인할 이슈가 없습니다.";
+    }
+
+    if (currentUser.role === "ADMIN") {
+      return "등록된 이슈가 없습니다.";
+    }
+
+    return "할당된 이슈가 없습니다.";
+  }, [currentUser]);
 
   const recentIssues: RecentIssueRow[] = useMemo(() => {
     return issues.slice(0, 5).map((issue) => ({
@@ -74,7 +168,7 @@ function DashboardPage() {
       status: issue.status,
       priority: issue.priority,
       assignee: issue.assignee?.username ?? "-",
-      lastActivity: issue.reportedDate ?? "-",
+      lastActivity: issue.reportedDate ? issue.reportedDate.slice(0, 10) : "-",
     }));
   }, [issues]);
 
@@ -99,7 +193,11 @@ function DashboardPage() {
       <div className="dashboard-top-bar">
         <h2>대시보드</h2>
 
-        <button type="button" className="project-chip">
+        <button
+          type="button"
+          className="project-chip"
+          onClick={() => navigate("/projects")}
+        >
           {project?.name ?? `Project ${numericProjectId}`}
         </button>
       </div>
@@ -114,7 +212,7 @@ function DashboardPage() {
 
       <div className="dashboard-main-grid">
         <article className="my-task-panel">
-          <div className="panel-title">내 할 일</div>
+          <div className="panel-title">{myTaskTitle}</div>
 
           {myTasks.length > 0 ? (
             <ul className="my-task-list">
@@ -129,7 +227,7 @@ function DashboardPage() {
               ))}
             </ul>
           ) : (
-            <p className="dashboard-empty-message">할당된 이슈가 없습니다.</p>
+            <p className="dashboard-empty-message">{emptyTaskMessage}</p>
           )}
         </article>
 
