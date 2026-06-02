@@ -150,6 +150,7 @@ public class MainFrame extends JFrame {
 
         IssueDetailPanel issueDetailPanel = new IssueDetailPanel();
         issueDetailPanel.setIssueService(services.getIssueService());
+        issueDetailPanel.setUserService(services.getUserService());
 
         StatisticsPanel statisticsPanel = new StatisticsPanel();
         statisticsPanel.setStatisticsService(services.getStatisticsService());
@@ -164,6 +165,8 @@ public class MainFrame extends JFrame {
 
             @Override
             public void onIssueSelected(int issueId) {
+                issueDetailPanel.setAssignable(currentUser != null
+                        && (currentUser.hasRole(Role.PL) || currentUser.hasRole(Role.ADMIN)));
                 issueDetailPanel.loadIssue(issueId);
                 contentCardLayout.show(contentAreaPanel, ISSUE_DETAIL_CARD);
                 navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
@@ -180,6 +183,8 @@ public class MainFrame extends JFrame {
 
             @Override
             public void onCancelFromEditRequested(int issueId) {
+                issueDetailPanel.setAssignable(currentUser != null
+                        && (currentUser.hasRole(Role.PL) || currentUser.hasRole(Role.ADMIN)));
                 issueDetailPanel.loadIssue(issueId);
                 contentCardLayout.show(contentAreaPanel, ISSUE_DETAIL_CARD);
                 navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
@@ -220,8 +225,8 @@ public class MainFrame extends JFrame {
             }
 
             @Override
-            public void onStatusChangeRequested(int issueId, IssueStatus status, String comment) {
-                handleStatusChange(issueId, status, comment, issuesPanel, issueDetailPanel, statisticsPanel);
+            public void onStatusChangeRequested(int issueId, IssueStatus status, Long assigneeId, String comment) {
+                handleStatusChange(issueId, status, assigneeId, comment, issuesPanel, issueDetailPanel, statisticsPanel);
             }
         });
 
@@ -283,6 +288,7 @@ public class MainFrame extends JFrame {
     private void handleStatusChange(
             int issueId,
             IssueStatus status,
+            Long assigneeId,
             String comment,
             IssuesPanel issuesPanel,
             IssueDetailPanel issueDetailPanel,
@@ -297,6 +303,10 @@ public class MainFrame extends JFrame {
                 throw new IllegalArgumentException("status must be selected");
             }
 
+            if (status == IssueStatus.ASSIGNED && assigneeId == null) {
+                throw new IllegalArgumentException("assigneeId must be selected");
+            }
+
             Long id = (long) issueId;
             Issue updatedIssue;
 
@@ -304,7 +314,7 @@ public class MainFrame extends JFrame {
                 case ASSIGNED -> updatedIssue = services.getIssueService().assignIssue(
                         id,
                         currentUser.getId(),
-                        selectAssigneeId(id),
+                        assigneeId,
                         comment
                 );
                 case FIXED -> updatedIssue = services.getIssueService().markFixed(
@@ -338,6 +348,8 @@ public class MainFrame extends JFrame {
                     JOptionPane.INFORMATION_MESSAGE
             );
 
+            issueDetailPanel.setAssignable(currentUser != null
+                    && (currentUser.hasRole(Role.PL) || currentUser.hasRole(Role.ADMIN)));
             issueDetailPanel.loadIssue(issueId);
             issuesPanel.refreshIssues();
             statisticsPanel.refreshStatistics();
