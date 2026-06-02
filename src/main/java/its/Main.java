@@ -7,7 +7,10 @@ import its.service.ApplicationServices;
 import its.service.AssigneeRecommendation;
 import its.service.DemoDataSeeder;
 import its.service.ServiceFactory;
+import its.ui.gui.MainFrame;
+import its.ui.gui.common.UIConfig;
 
+import javax.swing.SwingUtilities;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +27,11 @@ public class Main {
             return;
         }
 
+        if (args.length > 0 && "swing".equalsIgnoreCase(args[0])) {
+            startSwingApp();
+            return;
+        }
+
         printConsoleDemo(services);
     }
 
@@ -32,6 +40,15 @@ public class Main {
         apiServer.start();
 
         System.out.println("Use Ctrl+C to stop the API server.");
+    }
+
+    private static void startSwingApp() {
+        UIConfig.initialize();
+
+        SwingUtilities.invokeLater(() -> {
+            MainFrame frame = new MainFrame();
+            frame.setVisible(true);
+        });
     }
 
     private static void printConsoleDemo(ApplicationServices services) {
