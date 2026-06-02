@@ -961,24 +961,49 @@ button {
 ========================= */
 
 .issue-detail-page {
-  gap: 18px;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  gap: 20px;
 }
 
 .issue-detail-top-bar {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+}
+
+.issue-back-button {
+  font-size: 14px;
+  font-weight: 900;
 }
 
 .issue-detail-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 20px;
+  gap: 24px;
+}
+
+.issue-detail-header h2 {
+  margin: 0 0 8px;
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  color: #020617;
+}
+
+.issue-detail-header p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #020617;
 }
 
 .issue-detail-header-actions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
+  padding-top: 4px;
 }
 
 .issue-detail-grid {
@@ -989,23 +1014,27 @@ button {
 }
 
 .issue-detail-card {
-  padding: 20px;
-  min-height: 210px;
+  min-height: 260px;
+  padding: 22px 24px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
 }
 
 .issue-detail-card h3 {
-  margin: 0 0 16px;
-  font-size: 16px;
+  margin: 0 0 20px;
+  font-size: 18px;
   font-weight: 900;
   color: var(--text-main);
 }
 
 .issue-meta-list {
   display: grid;
-  grid-template-columns: 78px 1fr;
-  gap: 10px 12px;
+  grid-template-columns: 86px minmax(0, 1fr);
+  gap: 12px 14px;
   margin: 0;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .issue-meta-list dt {
@@ -1016,6 +1045,7 @@ button {
 .issue-meta-list dd {
   margin: 0;
   color: var(--text-main);
+  word-break: break-word;
 }
 
 .issue-description-card p {
@@ -1023,33 +1053,91 @@ button {
   line-height: 1.75;
   color: var(--text-main);
   white-space: pre-wrap;
+  font-size: 15px;
+}
+
+.issue-action-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.issue-action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.issue-action-buttons button,
+.full-width-button {
+  width: 100%;
+}
+
+.recommendation-preview {
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.recommendation-preview h4 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+.recommendation-preview p {
+  margin: 0;
+  color: var(--text-main);
+  line-height: 1.6;
   font-size: 14px;
 }
 
-.issue-action-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 13px;
-}
-
-.detail-form-field {
+.recommendation-preview ul {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.detail-form-field span {
-  font-size: 12px;
-  font-weight: 900;
-  color: #334155;
+.recommendation-preview li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  font-size: 13px;
 }
 
-.detail-form-field textarea {
-  min-height: 110px;
+.recommendation-preview li strong {
+  color: var(--text-main);
+}
+
+.recommendation-preview li span {
+  color: var(--text-sub);
+  font-weight: 700;
+}
+
+.issue-comment-section {
+  margin-top: 4px;
 }
 
 .comment-list-card {
-  min-height: 210px;
+  min-height: 240px;
+  padding: 22px 24px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.comment-list-card h3 {
+  margin: 0 0 18px;
+  font-size: 18px;
+  font-weight: 900;
 }
 
 .comment-list {
@@ -1059,7 +1147,7 @@ button {
 }
 
 .comment-item {
-  padding: 14px;
+  padding: 14px 16px;
   border-radius: 10px;
   background: #f8fafc;
   border: 1px solid var(--border);
@@ -1510,4 +1598,141 @@ button {
   .issue-trend-table {
     min-width: 760px;
   }
+}
+
+/* =========================
+   Modal
+========================= */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.modal-card {
+  width: min(560px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.32);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+.modal-close-button {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modal-close-button:hover {
+  background: #e2e8f0;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 18px 24px 24px;
+}
+
+.modal-info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 14px;
+}
+
+.modal-info-row span {
+  font-weight: 800;
+}
+
+.modal-info-row strong {
+  color: var(--text-main);
+}
+
+.assign-recommendation-box {
+  padding: 16px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+}
+
+.assign-recommendation-box h4 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.assign-recommendation-box ul {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.assign-recommendation-box p {
+  margin: 0;
+  color: var(--text-sub);
+  font-size: 14px;
+}
+
+.recommendation-button {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  text-align: left;
+}
+
+.recommendation-button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: #f8fafc;
 }
