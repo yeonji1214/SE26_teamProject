@@ -2,6 +2,7 @@ package its.ui.gui;
 
 import its.domain.issue.IssueStatus;
 import its.domain.issue.Priority;
+import its.domain.user.User;
 import its.service.ApplicationServices;
 import its.service.DemoDataSeeder;
 import its.service.ServiceFactory;
@@ -40,7 +41,7 @@ public class MainFrame extends JFrame {
     private NavigationPanel navigationPanel;
     private CardLayout contentCardLayout;
     private JPanel contentAreaPanel;
-    private String currentUser;
+    private User currentUser;
 
     private static final String LOGIN_CARD = "LOGIN";
     private static final String MAIN_CARD = "MAIN";
@@ -77,8 +78,9 @@ public class MainFrame extends JFrame {
         contentPanel = new JPanel(cardLayout);
 
         loginPanel = new LoginPanel();
-        loginPanel.setLoginListener(username -> {
-            currentUser = username;
+        loginPanel.setUserService(services.getUserService());
+        loginPanel.setLoginListener(user -> {
+            currentUser = user;
             showMainPanel();
         });
 
@@ -104,10 +106,10 @@ public class MainFrame extends JFrame {
 
     private void showMainPanel() {
         System.out.println("[MainFrame] Switching to MAIN screen ...");
-        System.out.println("[MainFrame] Current User: " + currentUser);
+        System.out.println("[MainFrame] Current User: " + currentUsername());
 
         if (titleBarPanel != null) {
-            titleBarPanel.setUsername(currentUser);
+            titleBarPanel.setUsername(currentUsername());
         }
 
         cardLayout.show(contentPanel, MAIN_CARD);
@@ -116,7 +118,7 @@ public class MainFrame extends JFrame {
     private JPanel createMainPanel() {
         JPanel panel = new JPanel(new BorderLayout());
 
-        titleBarPanel = new TitleBarPanel(currentUser);
+        titleBarPanel = new TitleBarPanel(currentUsername());
         panel.add(titleBarPanel, BorderLayout.NORTH);
 
         navigationPanel = new NavigationPanel();
@@ -235,8 +237,8 @@ public class MainFrame extends JFrame {
         );
 
         if (result == JOptionPane.YES_OPTION) {
-            showLoginPanel();
             currentUser = null;
+            showLoginPanel();
         }
     }
 
@@ -259,5 +261,9 @@ public class MainFrame extends JFrame {
                 ((BasePanel) component).clear();
             }
         }
+    }
+
+    private String currentUsername() {
+        return currentUser == null ? "" : currentUser.getUsername();
     }
 }
