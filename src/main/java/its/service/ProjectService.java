@@ -3,6 +3,7 @@ package its.service;
 import its.domain.project.Project;
 import its.repository.project.ProjectRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class ProjectService {
@@ -16,7 +17,7 @@ public class ProjectService {
         if (projectRepository.findByName(name).isPresent()) {
             throw new IllegalArgumentException("duplicated project name: " + name);
         }
-        return projectRepository.save(new Project(null, name, description));
+        return projectRepository.save(new Project(null, name, description, LocalDateTime.now()));
     }
 
     public Project getProject(Long projectId) {
