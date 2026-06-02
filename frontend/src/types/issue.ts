@@ -47,6 +47,7 @@ export interface IssueCreateRequest {
 
 export interface IssueStatusUpdateRequest {
   status: IssueStatus;
+  actorId?: number;
   assigneeId?: number;
   fixerId?: number;
   comment?: string;
