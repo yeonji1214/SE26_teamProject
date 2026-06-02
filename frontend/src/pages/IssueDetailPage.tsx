@@ -91,7 +91,7 @@ function IssueDetailPage() {
   const canAssignIssue =
     currentUser?.role === "ADMIN" || currentUser?.role === "PL";
 
-  const canDeleteIssue = currentUser?.role === "ADMIN";
+  
 
   const allowedStatuses = useMemo(() => {
     if (!issue) {
@@ -353,17 +353,7 @@ function IssueDetailPage() {
           <p>Issue #{issue.id}</p>
         </div>
 
-        <div className="issue-detail-header-actions">
-          <button type="button" className="secondary-button">
-            수정
-          </button>
 
-          {canDeleteIssue && (
-            <button type="button" className="danger-button">
-              삭제
-            </button>
-          )}
-        </div>
       </div>
 
       <div className="issue-detail-grid">
@@ -414,9 +404,25 @@ function IssueDetailPage() {
               {recommendations.length > 0 ? (
                 <ul>
                   {recommendations.slice(0, 3).map((recommendation) => (
-                    <li key={recommendation.assignee.id}>
-                      <strong>{recommendation.assignee.username}</strong>
-                      <span>score: {recommendation.score}</span>
+                    <li key={recommendation.assignee.id} className="recommendation-preview-item">
+                      <div className="recommendation-preview-header">
+                        <strong>{recommendation.assignee.username}</strong>
+                        <span>score: {recommendation.score.toFixed(1)}</span>
+                      </div>
+
+                      <p>
+                        <strong>근거 이슈:</strong>{" "}
+                        {recommendation.evidenceIssueTitles.length > 0
+                          ? recommendation.evidenceIssueTitles[0]
+                          : "없음"}
+                      </p>
+
+                      <p>
+                        <strong>매칭 키워드:</strong>{" "}
+                        {recommendation.matchedTerms.length > 0
+                          ? recommendation.matchedTerms.join(", ")
+                          : "없음"}
+                      </p>
                     </li>
                   ))}
                 </ul>
@@ -533,15 +539,45 @@ function IssueDetailPage() {
                     <li key={recommendation.assignee.id}>
                       <button
                         type="button"
-                        className="recommendation-button"
+                        className="recommendation-button recommendation-button-detail"
                         onClick={() =>
-                          setSelectedAssigneeId(
-                            recommendation.assignee.id.toString()
-                          )
+                          setSelectedAssigneeId(recommendation.assignee.id.toString())
                         }
                       >
-                        <strong>{recommendation.assignee.username}</strong>
-                        <span>score: {recommendation.score}</span>
+                        <div className="recommendation-preview-header">
+                          <strong>{recommendation.assignee.username}</strong>
+                          <span>score: {recommendation.score.toFixed(1)}</span>
+                        </div>
+
+                        <div className="recommendation-reason">
+                          <p>
+                            <strong>근거 이슈:</strong>{" "}
+                            {recommendation.evidenceIssueTitles.length > 0
+                              ? recommendation.evidenceIssueTitles.join(", ")
+                              : "없음"}
+                          </p>
+
+                          <p>
+                            <strong>매칭 키워드:</strong>{" "}
+                            {recommendation.matchedTerms.length > 0
+                              ? recommendation.matchedTerms.join(", ")
+                              : "없음"}
+                          </p>
+
+                          <p>
+                            <strong>매칭된 해결 이슈 수:</strong>{" "}
+                            {recommendation.matchedIssueCount}
+                          </p>
+
+                          <p>
+                            <strong>현재 담당 중인 미해결 이슈:</strong>{" "}
+                            {recommendation.currentOpenAssignedIssueCount}
+                          </p>
+
+                          <p>
+                            <strong>설명:</strong> {recommendation.explanation}
+                          </p>
+                        </div>
                       </button>
                     </li>
                   ))}

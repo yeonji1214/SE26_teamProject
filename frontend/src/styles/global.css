@@ -1202,6 +1202,48 @@ button {
   color: var(--text-sub);
 }
 
+.recommendation-preview-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recommendation-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.recommendation-preview-item p,
+.recommendation-reason p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.recommendation-preview-item p strong,
+.recommendation-reason p strong {
+  color: #111827;
+}
+
+.recommendation-button-detail {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  text-align: left;
+}
+
+.recommendation-reason {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
 /* =========================
    Statistics Page
 ========================= */
