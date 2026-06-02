@@ -105,9 +105,7 @@ public class LoginPanel extends BasePanel {
             if (!user.getPassword().equals(password)) {
                 throw new IllegalArgumentException("invalid password");
             }
-
-            System.out.println("[LoginPanel] Login: " + user.getUsername());
-
+            
             if (loginListener != null) {
                 loginListener.onLoginSuccess(user);
             }
