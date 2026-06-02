@@ -102,6 +102,10 @@ public class IssueDetailPanel extends BasePanel {
         commentTextArea.setWrapStyleWord(true);
 
         recommendationPanel = new JPanel();
+        recAssigneeLabel = new JLabel("추천 담당자: -");
+        recScoreLabel = new JLabel("추천 점수: -");
+        recEvidenceLabel = new JLabel("근거 이슈: -");
+        recKeywordLabel = new JLabel("매칭 키워드: -");
 
         commentListPanel = new JPanel();
 
@@ -177,7 +181,7 @@ public class IssueDetailPanel extends BasePanel {
         gbc.gridy = 3;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
-        panel.add(new JPanel(null) {{ setOpaque(false); }}, gbc);
+        panel.add(Box.createGlue(), gbc);
 
         return panel;
     }
@@ -384,35 +388,7 @@ public class IssueDetailPanel extends BasePanel {
         card.add(assigneeComboBox);
         card.add(Box.createVerticalStrut(10));
 
-        recommendationPanel.setLayout(new BoxLayout(recommendationPanel, BoxLayout.Y_AXIS));
-        recommendationPanel.setBackground(UIConstants.BACKGROUND_COLOR);
-        recommendationPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(180, 180, 180)),
-                BorderFactory.createEmptyBorder(8, 8, 8, 8)
-        ));
-        recommendationPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        recAssigneeLabel = new JLabel("추천 담당자: -");
-        recScoreLabel = new JLabel("추천 점수: -");
-        recEvidenceLabel = new JLabel("근거 이슈: -");
-        recKeywordLabel = new JLabel("매칭 키워드: -");
-
-        recAssigneeLabel.setFont(UIConstants.LABEL_FONT);
-        recScoreLabel.setFont(UIConstants.LABEL_FONT);
-        recEvidenceLabel.setFont(UIConstants.LABEL_FONT);
-        recKeywordLabel.setFont(UIConstants.LABEL_FONT);
-
-        recommendationPanel.add(recAssigneeLabel);
-        recommendationPanel.add(Box.createVerticalStrut(2));
-        recommendationPanel.add(recScoreLabel);
-        recommendationPanel.add(Box.createVerticalStrut(2));
-        recommendationPanel.add(recEvidenceLabel);
-        recommendationPanel.add(Box.createVerticalStrut(2));
-        recommendationPanel.add(recKeywordLabel);
-
-        recommendationPanel.setVisible(false);
-
-        card.add(recommendationPanel);
+        card.add(createRecommendationPanel());
         card.add(Box.createVerticalStrut(10));
 
         JLabel commentLabel = new JLabel("코멘트");
@@ -450,6 +426,33 @@ public class IssueDetailPanel extends BasePanel {
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, panel.getPreferredSize().height));
 
         return panel;
+    }
+
+    private JPanel createRecommendationPanel() {
+        recommendationPanel.setLayout(new BoxLayout(recommendationPanel, BoxLayout.Y_AXIS));
+        recommendationPanel.setBackground(UIConstants.BACKGROUND_COLOR);
+        recommendationPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(180, 180, 180)),
+                BorderFactory.createEmptyBorder(8, 8, 8, 8)
+        ));
+        recommendationPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        recAssigneeLabel.setFont(UIConstants.LABEL_FONT);
+        recScoreLabel.setFont(UIConstants.LABEL_FONT);
+        recEvidenceLabel.setFont(UIConstants.LABEL_FONT);
+        recKeywordLabel.setFont(UIConstants.LABEL_FONT);
+
+        recommendationPanel.add(recAssigneeLabel);
+        recommendationPanel.add(Box.createVerticalStrut(2));
+        recommendationPanel.add(recScoreLabel);
+        recommendationPanel.add(Box.createVerticalStrut(2));
+        recommendationPanel.add(recEvidenceLabel);
+        recommendationPanel.add(Box.createVerticalStrut(2));
+        recommendationPanel.add(recKeywordLabel);
+
+        recommendationPanel.setVisible(false);
+
+        return recommendationPanel;
     }
 
     private JPanel createCommentCard(Comment comment) {
