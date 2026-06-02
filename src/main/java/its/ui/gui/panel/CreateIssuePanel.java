@@ -2,6 +2,7 @@ package its.ui.gui.panel;
 
 import its.domain.issue.Priority;
 import its.domain.project.Project;
+import its.service.ProjectService;
 import its.ui.gui.common.PlaceholderTextField;
 import its.ui.gui.common.UIConstants;
 
@@ -9,24 +10,26 @@ import javax.swing.*;
 import java.awt.*;
 
 public class CreateIssuePanel extends BasePanel {
-
-    // 입력 폼 컴포넌트
     private JComboBox<String> projectComboBox;
     private PlaceholderTextField titleTextField;
     private JTextArea descriptionTextArea;
     private JComboBox<Priority> priorityComboBox;
 
-    // 버튼
     private JButton cancelButton;
     private JButton saveButton;
 
-    // 리스너
     private CreateIssueActionListener listener;
 
-    // 수정모드 관련 필드
     private boolean isEditMode = false;
     private int currentIssueId;
     private JLabel formTitleLabel;
+
+    private ProjectService projectService;
+
+    public void setProjectService(ProjectService projectService) {
+        this.projectService = projectService;
+        refreshProjects();
+    }
 
     @Override
     protected void initComponents() {
@@ -44,6 +47,7 @@ public class CreateIssuePanel extends BasePanel {
         add(formPanel, BorderLayout.CENTER);
         add(infoPanel, BorderLayout.EAST);
 
+        refreshProjects();
     }
 
     @Override
@@ -65,7 +69,8 @@ public class CreateIssuePanel extends BasePanel {
                 String description = descriptionTextArea.getText();
                 Priority priority = (Priority) priorityComboBox.getSelectedItem();
 
-                listener.onSaveRequested(project, title, description, priority);}
+                listener.onSaveRequested(project, title, description, priority);
+            }
         });
     }
 
@@ -182,13 +187,35 @@ public class CreateIssuePanel extends BasePanel {
         return panel;
     }
 
+    private void refreshProjects() {
+        if (projectComboBox == null) {
+            return;
+        }
+
+        Object selected = projectComboBox.getSelectedItem();
+
+        projectComboBox.removeAllItems();
+
+        if (projectService != null) {
+            for (Project project : projectService.getAllProjects()) {
+                projectComboBox.addItem(project.getName());
+            }
+        }
+
+        if (selected != null) {
+            projectComboBox.setSelectedItem(selected);
+        }
+    }
+
     public void setCreateIssueActionListener(CreateIssueActionListener listener) {
         this.listener = listener;
     }
 
     public interface CreateIssueActionListener {
         void onSaveRequested(String project, String title, String description, Priority priority);
+
         void onCancelRequested();
+
         void onCancelFromEditRequested(int issueId);
     }
 
@@ -199,20 +226,22 @@ public class CreateIssuePanel extends BasePanel {
         formTitleLabel.setText("이슈 수정");
         saveButton.setText("수정");
 
-        // TODO: 서비스 연결 후 issueId로 실제 이슈 정보 받아오기
+        // 이슈 수정 기능은 이후 커밋에서 별도로 연결한다.
     }
 
     @Override
     public void clear() {
-        // 수정 모드 초기화
         isEditMode = false;
         currentIssueId = -1;
         formTitleLabel.setText("이슈 등록");
         saveButton.setText("저장");
 
+        refreshProjects();
+
         if (projectComboBox.getItemCount() > 0) {
             projectComboBox.setSelectedIndex(0);
         }
+
         titleTextField.setText("");
         descriptionTextArea.setText("");
         priorityComboBox.setSelectedIndex(0);
@@ -220,7 +249,7 @@ public class CreateIssuePanel extends BasePanel {
 
     @Override
     public void onActivate() {
-        // TODO: project 콤보박스 리스트 갱신
+        refreshProjects();
 
         if (!isEditMode) {
             clear();
