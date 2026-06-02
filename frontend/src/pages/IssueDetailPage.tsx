@@ -7,6 +7,7 @@ import {
 } from "../api/issueApi";
 import { getAssigneeRecommendations } from "../api/recommendationApi";
 import { getUsers } from "../api/userApi";
+import AssignIssueModal from "../components/AssignIssueModal";
 import CommentList from "../components/CommentListPanel";
 import IssueDescriptionCard from "../components/IssueDescriptionCard";
 import IssueMetaCard from "../components/IssueMetaCard";
@@ -91,8 +92,6 @@ function IssueDetailPage() {
   const canAssignIssue =
     currentUser?.role === "ADMIN" || currentUser?.role === "PL";
 
-  
-
   const allowedStatuses = useMemo(() => {
     if (!issue) {
       return [];
@@ -161,6 +160,7 @@ function IssueDetailPage() {
     setCommentText("");
     setStatusComment("");
     setAssignComment("");
+    setSelectedAssigneeId("");
   };
 
   const openCommentModal = () => {
@@ -352,8 +352,6 @@ function IssueDetailPage() {
           <h2>{issue.title}</h2>
           <p>Issue #{issue.id}</p>
         </div>
-
-
       </div>
 
       <div className="issue-detail-grid">
@@ -404,7 +402,10 @@ function IssueDetailPage() {
               {recommendations.length > 0 ? (
                 <ul>
                   {recommendations.slice(0, 3).map((recommendation) => (
-                    <li key={recommendation.assignee.id} className="recommendation-preview-item">
+                    <li
+                      key={recommendation.assignee.id}
+                      className="recommendation-preview-item"
+                    >
                       <div className="recommendation-preview-header">
                         <strong>{recommendation.assignee.username}</strong>
                         <span>score: {recommendation.score.toFixed(1)}</span>
@@ -479,7 +480,8 @@ function IssueDetailPage() {
             </div>
 
             <p className="modal-help-text">
-              코멘트는 선택 사항입니다. 입력하면 상태 변경 이력과 함께 코멘트에 기록됩니다.
+              코멘트는 선택 사항입니다. 입력하면 상태 변경 이력과 함께
+              코멘트에 기록됩니다.
             </p>
 
             <label className="detail-form-field">
@@ -528,107 +530,16 @@ function IssueDetailPage() {
       )}
 
       {modalType === "assign" && (
-        <Modal title="담당자 지정" onClose={closeModal}>
-          <div className="modal-body">
-            <div className="assign-recommendation-box">
-              <h4>추천 담당자</h4>
-
-              {recommendations.length > 0 ? (
-                <ul>
-                  {recommendations.map((recommendation) => (
-                    <li key={recommendation.assignee.id}>
-                      <button
-                        type="button"
-                        className="recommendation-button recommendation-button-detail"
-                        onClick={() =>
-                          setSelectedAssigneeId(recommendation.assignee.id.toString())
-                        }
-                      >
-                        <div className="recommendation-preview-header">
-                          <strong>{recommendation.assignee.username}</strong>
-                          <span>score: {recommendation.score.toFixed(1)}</span>
-                        </div>
-
-                        <div className="recommendation-reason">
-                          <p>
-                            <strong>근거 이슈:</strong>{" "}
-                            {recommendation.evidenceIssueTitles.length > 0
-                              ? recommendation.evidenceIssueTitles.join(", ")
-                              : "없음"}
-                          </p>
-
-                          <p>
-                            <strong>매칭 키워드:</strong>{" "}
-                            {recommendation.matchedTerms.length > 0
-                              ? recommendation.matchedTerms.join(", ")
-                              : "없음"}
-                          </p>
-
-                          <p>
-                            <strong>매칭된 해결 이슈 수:</strong>{" "}
-                            {recommendation.matchedIssueCount}
-                          </p>
-
-                          <p>
-                            <strong>현재 담당 중인 미해결 이슈:</strong>{" "}
-                            {recommendation.currentOpenAssignedIssueCount}
-                          </p>
-
-                          <p>
-                            <strong>설명:</strong> {recommendation.explanation}
-                          </p>
-                        </div>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>추천 가능한 담당자가 없습니다.</p>
-              )}
-            </div>
-
-            <label className="detail-form-field">
-              <span>담당자 선택</span>
-              <select
-                value={selectedAssigneeId}
-                onChange={(event) => setSelectedAssigneeId(event.target.value)}
-              >
-                <option value="">담당자를 선택하세요</option>
-                {assigneeCandidates.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.username}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="detail-form-field">
-              <span>코멘트</span>
-              <textarea
-                value={assignComment}
-                onChange={(event) => setAssignComment(event.target.value)}
-                placeholder="담당자 지정 사유를 입력하세요."
-              />
-            </label>
-          </div>
-
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={closeModal}
-            >
-              취소
-            </button>
-            <button
-              type="button"
-              className="primary-button"
-              onClick={handleAssignIssue}
-            >
-              담당자 지정
-            </button>
-          </div>
-        </Modal>
+        <AssignIssueModal
+          recommendations={recommendations}
+          assigneeCandidates={assigneeCandidates}
+          selectedAssigneeId={selectedAssigneeId}
+          assignComment={assignComment}
+          onSelectAssignee={setSelectedAssigneeId}
+          onChangeComment={setAssignComment}
+          onClose={closeModal}
+          onSubmit={handleAssignIssue}
+        />
       )}
     </section>
   );

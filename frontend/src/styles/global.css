@@ -1244,6 +1244,91 @@ button {
   border-top: 1px solid #e5e7eb;
 }
 
+.recommendation-button {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #dbe3ef;
+  border-radius: 12px;
+  background: #ffffff;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.recommendation-button:hover {
+  border-color: #2563eb;
+  background: #f8fbff;
+}
+
+.recommendation-button-selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+}
+
+.recommendation-button-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.recommendation-button-header > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.recommendation-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.recommendation-button-detail {
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.recommendation-button-detail p {
+  margin: 4px 0;
+  color: #4b5563;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.selected-assignee-explanation {
+  padding: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.selected-assignee-explanation h4 {
+  margin: 0 0 10px;
+  color: #111827;
+  font-size: 15px;
+}
+
+.selected-assignee-explanation p {
+  margin: 5px 0;
+  color: #4b5563;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.selected-assignee-explanation strong {
+  color: #111827;
+}
+
 /* =========================
    Statistics Page
 ========================= */
