@@ -231,14 +231,12 @@ public class IssueDetailPanel extends BasePanel {
         gbc.insets = new Insets(0, 0, 0, 10);
 
         JPanel infoCard = createInfoCard();
-        //infoCard.setPreferredSize(new Dimension(0, infoCard.getPreferredSize().height));
         panel.add(infoCard, gbc);
 
         gbc.weightx = 0.5;
         gbc.gridx = 1;
 
         JPanel descriptionCard = createDescriptionCard();
-        //descriptionCard.setPreferredSize(new Dimension(0, descriptionCard.getPreferredSize().height));
         panel.add(descriptionCard, gbc);
 
         gbc.weightx = 0.25;
@@ -246,7 +244,6 @@ public class IssueDetailPanel extends BasePanel {
         gbc.insets = new Insets(0, 0, 0, 0);
 
         JPanel actionCard = createActionCard();
-        //actionCard.setPreferredSize(new Dimension(0, actionCard.getPreferredSize().height));
         panel.add(actionCard, gbc);
 
         return panel;

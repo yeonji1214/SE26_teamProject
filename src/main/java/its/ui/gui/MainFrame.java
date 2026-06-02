@@ -45,6 +45,8 @@ public class MainFrame extends JFrame {
     private JPanel contentAreaPanel;
     private User currentUser;
 
+    private ProjectsPanel projectsPanel;
+
     private static final String LOGIN_CARD = "LOGIN";
     private static final String MAIN_CARD = "MAIN";
 
@@ -114,6 +116,10 @@ public class MainFrame extends JFrame {
             titleBarPanel.setUsername(currentUsername());
         }
 
+        if (projectsPanel != null) {
+            projectsPanel.setAdmin(currentUser != null && currentUser.hasRole(Role.ADMIN));
+        }
+
         cardLayout.show(contentPanel, MAIN_CARD);
     }
 
@@ -139,7 +145,7 @@ public class MainFrame extends JFrame {
         contentCardLayout = new CardLayout();
         contentAreaPanel = new JPanel(contentCardLayout);
 
-        ProjectsPanel projectsPanel = new ProjectsPanel();
+        projectsPanel = new ProjectsPanel();
         projectsPanel.setProjectService(services.getProjectService());
 
         IssuesPanel issuesPanel = new IssuesPanel();
