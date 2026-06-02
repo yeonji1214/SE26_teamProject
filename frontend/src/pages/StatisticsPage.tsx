@@ -57,24 +57,28 @@ function StatisticsPage() {
   }, [statistics]);
 
   const totalIssues = statistics?.totalIssues ?? 0;
+
   const openIssues =
     (statistics?.byStatus.NEW ?? 0) +
     (statistics?.byStatus.ASSIGNED ?? 0) +
     (statistics?.byStatus.REOPENED ?? 0);
 
   const resolvedIssues =
-    (statistics?.byStatus.RESOLVED ?? 0) + (statistics?.byStatus.CLOSED ?? 0);
+    (statistics?.byStatus.RESOLVED ?? 0) +
+    (statistics?.byStatus.CLOSED ?? 0);
 
   const resolutionRate =
     totalIssues === 0 ? 0 : Math.round((resolvedIssues / totalIssues) * 100);
 
   return (
-    <section className="page-section">
-      <div className="page-header-row">
+    <section className="statistics-page">
+      <div className="statistics-header">
         <div>
           <h2>통계</h2>
-          <p>백엔드 API에서 이슈 발생 현황과 처리 추이를 확인합니다.</p>
+          <p>이슈 발생 현황과 처리 추이를 확인합니다.</p>
         </div>
+
+        <span className="project-chip">Project 1</span>
       </div>
 
       {isLoading && <p>통계 정보를 불러오는 중입니다.</p>}
@@ -82,21 +86,21 @@ function StatisticsPage() {
 
       {statistics && !isLoading && !errorMessage && (
         <>
-          <div className="statistics-summary-grid">
+          <div className="stat-summary-grid">
             <StatisticSummaryCard
               label="전체 이슈"
               value={totalIssues}
-              description="등록된 전체 이슈 수"
+              description="현재 프로젝트 기준"
             />
             <StatisticSummaryCard
-              label="진행 중"
+              label="미해결 이슈"
               value={openIssues}
-              description="NEW, ASSIGNED, REOPENED"
+              description="NEW / ASSIGNED / REOPENED"
             />
             <StatisticSummaryCard
-              label="해결/종료"
+              label="해결된 이슈"
               value={resolvedIssues}
-              description="RESOLVED, CLOSED"
+              description="RESOLVED / CLOSED"
             />
             <StatisticSummaryCard
               label="해결률"
@@ -105,15 +109,19 @@ function StatisticsPage() {
             />
           </div>
 
-          <IssueStatusChart items={statusStats} />
-          <IssueTrendTable rows={monthlyTrendRows} />
+          <div className="statistics-grid">
+            <IssueStatusChart items={statusStats} />
+            <IssueTrendTable rows={monthlyTrendRows} />
+          </div>
 
-          <article className="statistics-card">
-            <h3>담당자별 이슈 수</h3>
-            <ul>
+          <article className="stat-panel assignee-stat-panel">
+            <h3 className="panel-title">담당자별 이슈 수</h3>
+
+            <ul className="assignee-stat-list">
               {Object.entries(statistics.byAssignee).map(([assignee, count]) => (
                 <li key={assignee}>
-                  {assignee}: {count}
+                  <span>{assignee}</span>
+                  <strong>{count}</strong>
                 </li>
               ))}
             </ul>

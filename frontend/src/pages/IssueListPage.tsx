@@ -153,8 +153,8 @@ function IssueListPage() {
   };
 
   return (
-    <section className="page-section">
-      <div className="page-header-row">
+    <section className="issue-list-page">
+      <div className="issue-list-header">
         <div>
           <h2>이슈 목록</h2>
           <p>백엔드 API에서 불러온 이슈 목록을 조회합니다.</p>
@@ -162,7 +162,7 @@ function IssueListPage() {
 
         <button
           type="button"
-          className="primary-button"
+          className="primary-button issue-create-button"
           onClick={() => navigate("/issues/new")}
         >
           + 이슈 등록

@@ -98,22 +98,25 @@ function ProjectPage() {
   };
 
   return (
-    <section className="page-section">
-      <div className="page-header-row">
+    <section className="project-page">
+      <div className="project-page-header">
         <div>
           <h2>프로젝트</h2>
           <p>백엔드 API에서 프로젝트 목록을 불러옵니다.</p>
         </div>
       </div>
 
-      <ProjectForm onSubmit={handleCreateProject} />
-
       {isLoading && <p>프로젝트 목록을 불러오는 중입니다.</p>}
       {errorMessage && <p className="error-message">{errorMessage}</p>}
 
       {!isLoading && !errorMessage && (
-        <ProjectTable projects={projectRows} onEnterProject={handleEnterProject} />
+        <ProjectTable
+          projects={projectRows}
+          onEnterProject={handleEnterProject}
+        />
       )}
+
+      <ProjectForm onSubmit={handleCreateProject} />
     </section>
   );
 }

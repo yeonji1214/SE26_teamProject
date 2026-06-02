@@ -30,27 +30,20 @@ function IssueCreatePage() {
   };
 
   return (
-    <section className="page-section">
-      <div className="page-header-row">
-        <div>
-          <h2>이슈 등록</h2>
-          <p>새 이슈를 백엔드 API를 통해 등록합니다.</p>
-        </div>
-        <button
-          type="button"
-          className="secondary-button"
-          onClick={() => navigate("/issues")}
-        >
-          목록으로
-        </button>
-      </div>
+    <section className="issue-create-page">
+      <main className="issue-create-main">
+        <h2>이슈 등록</h2>
 
-      <IssueCreateGuide />
-      <IssueAutoInfoCard />
-      <IssueForm
-        onSubmit={handleCreateIssue}
-        onCancel={() => navigate("/issues")}
-      />
+        <IssueForm
+          onSubmit={handleCreateIssue}
+          onCancel={() => navigate("/issues")}
+        />
+      </main>
+
+      <aside className="issue-create-side">
+        <IssueCreateGuide />
+        <IssueAutoInfoCard />
+      </aside>
     </section>
   );
 }
