@@ -141,6 +141,8 @@ public class MainFrame extends JFrame {
         projectsPanel.setProjectService(services.getProjectService());
 
         IssuesPanel issuesPanel = new IssuesPanel();
+        issuesPanel.setServices(services.getIssueService(), services.getProjectService());
+
         CreateIssuePanel createIssuePanel = new CreateIssuePanel();
         IssueDetailPanel issueDetailPanel = new IssueDetailPanel();
 
