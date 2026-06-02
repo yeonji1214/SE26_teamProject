@@ -1381,6 +1381,54 @@ button {
   color: var(--primary);
 }
 
+
+.statistics-project-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #e1e6ef;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.statistics-project-selector span {
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.statistics-project-selector select {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.selected-project-summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.selected-project-summary p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.empty-message {
+  margin: 0;
+  color: #64748b;
+  font-weight: 600;
+}
+
 /* 담당자별 이슈 수가 ul로 그대로 나오는 경우 카드처럼 보이도록 보정 
 .statistics-page > h3 {
   margin: 6px 0 0;
