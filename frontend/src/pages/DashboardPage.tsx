@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { type ChangeEvent, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import IssueSummaryCard from "../components/IssueSummaryCard";
 import RecentIssueTable, {
   type RecentIssueRow,
 } from "../components/RecentIssueTable";
 import { getIssuesByProjectId } from "../api/issueApi";
-import { getProjectById } from "../api/projectApi";
+import { getProjects } from "../api/projectApi";
 import type { Issue } from "../types/issue";
 import type { Project } from "../types/project";
 import type { User } from "../types/user";
@@ -15,9 +15,9 @@ function DashboardPage() {
   const navigate = useNavigate();
   const { projectId } = useParams();
 
-  const numericProjectId = Number(projectId ?? 1);
+  const numericProjectId = projectId ? Number(projectId) : null;
 
-  const [project, setProject] = useState<Project | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [issues, setIssues] = useState<Issue[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(() =>
     getCurrentUser()
@@ -42,7 +42,41 @@ function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (!numericProjectId || Number.isNaN(numericProjectId)) {
+    const loadProjects = async () => {
+      setIsLoading(true);
+      setErrorMessage("");
+
+      try {
+        const projectData = await getProjects();
+        setProjects(projectData);
+
+        if (!projectId && projectData.length > 0) {
+          navigate(`/dashboard/${projectData[0].id}`, { replace: true });
+        }
+
+        if (projectData.length === 0) {
+          setIssues([]);
+        }
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "프로젝트 목록을 불러오지 못했습니다."
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProjects();
+  }, [projectId, navigate]);
+
+  useEffect(() => {
+    if (numericProjectId === null) {
+      return;
+    }
+
+    if (Number.isNaN(numericProjectId)) {
       setErrorMessage("잘못된 프로젝트 접근입니다.");
       setIsLoading(false);
       return;
@@ -53,12 +87,7 @@ function DashboardPage() {
       setErrorMessage("");
 
       try {
-        const [projectData, issueData] = await Promise.all([
-          getProjectById(numericProjectId),
-          getIssuesByProjectId(numericProjectId),
-        ]);
-
-        setProject(projectData);
+        const issueData = await getIssuesByProjectId(numericProjectId);
         setIssues(issueData);
       } catch (error) {
         setErrorMessage(
@@ -73,6 +102,14 @@ function DashboardPage() {
 
     loadDashboardData();
   }, [numericProjectId]);
+
+  const selectedProject = useMemo(() => {
+    if (numericProjectId === null) {
+      return null;
+    }
+
+    return projects.find((project) => project.id === numericProjectId) ?? null;
+  }, [projects, numericProjectId]);
 
   const summary = useMemo(() => {
     return {
@@ -172,6 +209,11 @@ function DashboardPage() {
     }));
   }, [issues]);
 
+  const handleProjectChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const nextProjectId = Number(event.target.value);
+    navigate(`/dashboard/${nextProjectId}`);
+  };
+
   if (isLoading) {
     return (
       <section className="dashboard-page">
@@ -188,18 +230,42 @@ function DashboardPage() {
     );
   }
 
+  if (projects.length === 0) {
+    return (
+      <section className="dashboard-page">
+        <div className="dashboard-top-bar">
+          <h2>대시보드</h2>
+        </div>
+
+        <p>등록된 프로젝트가 없습니다.</p>
+      </section>
+    );
+  }
+
   return (
     <section className="dashboard-page">
       <div className="dashboard-top-bar">
-        <h2>대시보드</h2>
+        <div>
+          <h2>대시보드</h2>
+          {selectedProject?.description && (
+            <p className="dashboard-project-description">
+              {selectedProject.description}
+            </p>
+          )}
+        </div>
 
-        <button
-          type="button"
-          className="project-chip"
-          onClick={() => navigate("/projects")}
-        >
-          {project?.name ?? `Project ${numericProjectId}`}
-        </button>
+        <div className="dashboard-project-selector">
+          <select
+            value={numericProjectId ?? ""}
+            onChange={handleProjectChange}
+          >
+            {projects.map((project) => (
+              <option key={project.id} value={project.id}>
+                {project.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="summary-card-row">
