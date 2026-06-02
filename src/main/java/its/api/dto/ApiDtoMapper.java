@@ -40,7 +40,8 @@ public class ApiDtoMapper {
         return new ProjectResponse(
                 project.getId(),
                 project.getName(),
-                project.getDescription()
+                project.getDescription(),
+                project.getCreatedAt().toString()
         );
     }
 

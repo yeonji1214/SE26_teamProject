@@ -1,6 +1,15 @@
 import type { IssuePriority, IssueStatus } from "../types/issue";
 
+interface SelectOption {
+  id: string;
+  name: string;
+}
+
 interface IssueFilterPanelProps {
+  projectOptions: SelectOption[];
+  reporterOptions: SelectOption[];
+  assigneeOptions: SelectOption[];
+
   projectFilter: string;
   statusFilter: IssueStatus | "";
   reporterFilter: string;
@@ -19,6 +28,9 @@ interface IssueFilterPanelProps {
 }
 
 function IssueFilterPanel({
+  projectOptions,
+  reporterOptions,
+  assigneeOptions,
   projectFilter,
   statusFilter,
   reporterFilter,
@@ -38,11 +50,17 @@ function IssueFilterPanel({
       <div className="filter-row">
         <label className="filter-field">
           <span>프로젝트</span>
-          <input
+          <select
             value={projectFilter}
             onChange={(event) => onProjectFilterChange(event.target.value)}
-            placeholder="project1"
-          />
+          >
+            <option value="">전체 프로젝트</option>
+            {projectOptions.map((project) => (
+              <option key={project.id} value={project.id}>
+                {project.name}
+              </option>
+            ))}
+          </select>
         </label>
 
         <label className="filter-field">
@@ -65,20 +83,32 @@ function IssueFilterPanel({
 
         <label className="filter-field">
           <span>리포터</span>
-          <input
+          <select
             value={reporterFilter}
             onChange={(event) => onReporterFilterChange(event.target.value)}
-            placeholder="tester1"
-          />
+          >
+            <option value="">전체 리포터</option>
+            {reporterOptions.map((reporter) => (
+              <option key={reporter.id} value={reporter.id}>
+                {reporter.name}
+              </option>
+            ))}
+          </select>
         </label>
 
         <label className="filter-field">
           <span>담당자</span>
-          <input
+          <select
             value={assigneeFilter}
             onChange={(event) => onAssigneeFilterChange(event.target.value)}
-            placeholder="dev1"
-          />
+          >
+            <option value="">전체 담당자</option>
+            {assigneeOptions.map((assignee) => (
+              <option key={assignee.id} value={assignee.id}>
+                {assignee.name}
+              </option>
+            ))}
+          </select>
         </label>
 
         <label className="filter-field">

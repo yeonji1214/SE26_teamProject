@@ -1,14 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getIssues } from "../api/issueApi";
+import { getProjects } from "../api/projectApi";
+import { getUsers } from "../api/userApi";
 import IssueFilterPanel from "../components/IssueFilterPanel";
 import IssueTable, { type IssueListRow } from "../components/IssueTable";
 import type { Issue, IssuePriority, IssueStatus } from "../types/issue";
+import type { Project } from "../types/project";
+import type { User } from "../types/user";
 
 function IssueListPage() {
   const navigate = useNavigate();
 
   const [issues, setIssues] = useState<Issue[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -20,16 +26,23 @@ function IssueListPage() {
   const [keyword, setKeyword] = useState("");
 
   useEffect(() => {
-    loadIssues();
+    loadPageData();
   }, []);
 
-  const loadIssues = async () => {
+  const loadPageData = async () => {
     setIsLoading(true);
     setErrorMessage("");
 
     try {
-      const data = await getIssues();
-      setIssues(data);
+      const [issueData, projectData, userData] = await Promise.all([
+        getIssues(),
+        getProjects(),
+        getUsers(),
+      ]);
+
+      setIssues(issueData);
+      setProjects(projectData);
+      setUsers(userData);
     } catch (error) {
       setErrorMessage(
         error instanceof Error
@@ -41,25 +54,56 @@ function IssueListPage() {
     }
   };
 
+  const projectOptions = useMemo(() => {
+    return projects
+      .slice()
+      .sort((a, b) => a.id - b.id)
+      .map((project) => ({
+        id: String(project.id),
+        name: project.name,
+      }));
+  }, [projects]);
+
+  const reporterOptions = useMemo(() => {
+    return users
+      .slice()
+      .filter((user) => user.role === "TESTER" || user.role === "ADMIN")
+      .sort((a, b) => a.username.localeCompare(b.username))
+      .map((user) => ({
+        id: user.username,
+        name: user.username,
+      }));
+  }, [users]);
+
+  const assigneeOptions = useMemo(() => {
+    return users
+      .slice()
+      .filter((user) => user.role === "DEV")
+      .sort((a, b) => a.username.localeCompare(b.username))
+      .map((user) => ({
+        id: user.username,
+        name: user.username,
+      }));
+  }, [users]);
+
+  const getProjectName = (projectId: number) => {
+    const project = projects.find((item) => item.id === projectId);
+    return project?.name ?? `project${projectId}`;
+  };
+
   const filteredIssues = useMemo(() => {
     return issues.filter((issue) => {
-      const projectName = `project${issue.projectId}`;
       const reporter = issue.reporter.username;
-      const assignee = issue.assignee?.username ?? "-";
+      const assignee = issue.assignee?.username ?? "";
 
       const matchesProject =
-        !projectFilter ||
-        projectName.toLowerCase().includes(projectFilter.toLowerCase());
+        !projectFilter || String(issue.projectId) === projectFilter;
 
       const matchesStatus = !statusFilter || issue.status === statusFilter;
 
-      const matchesReporter =
-        !reporterFilter ||
-        reporter.toLowerCase().includes(reporterFilter.toLowerCase());
+      const matchesReporter = !reporterFilter || reporter === reporterFilter;
 
-      const matchesAssignee =
-        !assigneeFilter ||
-        assignee.toLowerCase().includes(assigneeFilter.toLowerCase());
+      const matchesAssignee = !assigneeFilter || assignee === assigneeFilter;
 
       const matchesPriority =
         !priorityFilter || issue.priority === priorityFilter;
@@ -90,7 +134,7 @@ function IssueListPage() {
 
   const rows: IssueListRow[] = filteredIssues.map((issue) => ({
     id: issue.id,
-    project: `project${issue.projectId}`,
+    project: getProjectName(issue.projectId),
     title: issue.title,
     status: issue.status,
     priority: issue.priority,
@@ -109,15 +153,15 @@ function IssueListPage() {
   };
 
   return (
-    <section className="page-section">
-      <div className="page-header-row">
+    <section className="issue-list-page">
+      <div className="issue-list-header">
         <div>
           <h2>이슈 목록</h2>
-          <p>백엔드 API에서 불러온 이슈 목록을 조회합니다.</p>
         </div>
+
         <button
           type="button"
-          className="primary-button"
+          className="primary-button issue-create-button"
           onClick={() => navigate("/issues/new")}
         >
           + 이슈 등록
@@ -125,6 +169,9 @@ function IssueListPage() {
       </div>
 
       <IssueFilterPanel
+        projectOptions={projectOptions}
+        reporterOptions={reporterOptions}
+        assigneeOptions={assigneeOptions}
         projectFilter={projectFilter}
         statusFilter={statusFilter}
         reporterFilter={reporterFilter}

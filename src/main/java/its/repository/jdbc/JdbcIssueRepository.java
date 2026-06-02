@@ -357,7 +357,7 @@ public class JdbcIssueRepository implements IssueRepository {
 
     private Project findProject(Long id) {
         String sql = """
-            SELECT id, name, description
+            SELECT id, name, description, created_at
             FROM projects
             WHERE id = ?
             """;
@@ -372,7 +372,8 @@ public class JdbcIssueRepository implements IssueRepository {
                     return new Project(
                             resultSet.getLong("id"),
                             resultSet.getString("name"),
-                            resultSet.getString("description")
+                            resultSet.getString("description"),
+                            LocalDateTime.parse(resultSet.getString("created_at"))
                     );
                 }
 

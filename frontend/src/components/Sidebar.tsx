@@ -1,14 +1,26 @@
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import type { User } from "../types/user";
-import { clearCurrentUser, getCurrentUser } from "../utils/authStorage";
+import { AUTH_CHANGE_EVENT, clearCurrentUser, getCurrentUser } from "../utils/authStorage";
 
 function Sidebar() {
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
-    setCurrentUser(getCurrentUser());
+    const syncCurrentUser = () => {
+      setCurrentUser(getCurrentUser());
+    };
+
+    syncCurrentUser();
+
+    window.addEventListener(AUTH_CHANGE_EVENT, syncCurrentUser);
+    window.addEventListener("storage", syncCurrentUser);
+
+    return () => {
+      window.removeEventListener(AUTH_CHANGE_EVENT, syncCurrentUser);
+      window.removeEventListener("storage", syncCurrentUser);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -80,7 +92,7 @@ function Sidebar() {
           <>
             <div className="sidebar-user-info">
               <div className="sidebar-user-avatar">
-                {currentUser.displayName.charAt(0)}
+                {(currentUser.displayName || currentUser.username).charAt(0)}
               </div>
 
               <div>

@@ -5,7 +5,9 @@ interface IssueActionPanelProps {
   comment: string;
   onNextStatusChange: (status: IssueStatus) => void;
   onCommentChange: (comment: string) => void;
+  onAddComment: () => void;
   onApplyStatus: () => void;
+  onApplyStatusWithComment: () => void;
 }
 
 function IssueActionPanel({
@@ -13,7 +15,9 @@ function IssueActionPanel({
   comment,
   onNextStatusChange,
   onCommentChange,
+  onAddComment,
   onApplyStatus,
+  onApplyStatusWithComment,
 }: IssueActionPanelProps) {
   return (
     <article className="issue-detail-card issue-action-panel">
@@ -41,13 +45,35 @@ function IssueActionPanel({
         <textarea
           value={comment}
           onChange={(event) => onCommentChange(event.target.value)}
-          placeholder="상태 변경 사유 또는 작업 내용을 입력하세요."
+          placeholder="코멘트 또는 상태 변경 사유를 입력하세요."
         />
       </label>
 
-      <button type="button" className="primary-button" onClick={onApplyStatus}>
-        상태 변경
-      </button>
+      <div className="issue-action-button-group">
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={onAddComment}
+        >
+          코멘트 추가
+        </button>
+
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={onApplyStatus}
+        >
+          상태만 변경
+        </button>
+
+        <button
+          type="button"
+          className="primary-button"
+          onClick={onApplyStatusWithComment}
+        >
+          상태 변경 + 코멘트
+        </button>
+      </div>
     </article>
   );
 }

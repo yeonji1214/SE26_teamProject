@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getProjects } from "../api/projectApi";
 import type { IssueCreateRequest, IssuePriority } from "../types/issue";
+import type { Project } from "../types/project";
 
 interface IssueFormProps {
   onSubmit: (request: IssueCreateRequest) => void;
@@ -7,13 +9,38 @@ interface IssueFormProps {
 }
 
 function IssueForm({ onSubmit, onCancel }: IssueFormProps) {
-  const [projectId, setProjectId] = useState(1);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [projectId, setProjectId] = useState<number | "">("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<IssuePriority>("MAJOR");
+  const [isLoadingProjects, setIsLoadingProjects] = useState(true);
+
+  useEffect(() => {
+    getProjects()
+      .then((data) => {
+        setProjects(data);
+
+        if (data.length > 0) {
+          setProjectId(data[0].id);
+        }
+      })
+      .catch((error) => {
+        console.error("프로젝트 목록 조회 실패:", error);
+        alert("프로젝트 목록을 불러오지 못했습니다.");
+      })
+      .finally(() => {
+        setIsLoadingProjects(false);
+      });
+  }, []);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (projectId === "") {
+      alert("프로젝트를 선택하세요.");
+      return;
+    }
 
     if (!title.trim()) {
       alert("제목을 입력하세요.");
@@ -41,8 +68,21 @@ function IssueForm({ onSubmit, onCancel }: IssueFormProps) {
         <select
           value={projectId}
           onChange={(event) => setProjectId(Number(event.target.value))}
+          disabled={isLoadingProjects || projects.length === 0}
         >
-          <option value={1}>project1</option>
+          {isLoadingProjects && (
+            <option value="">프로젝트 불러오는 중...</option>
+          )}
+
+          {!isLoadingProjects && projects.length === 0 && (
+            <option value="">등록된 프로젝트가 없습니다</option>
+          )}
+
+          {projects.map((project) => (
+            <option key={project.id} value={project.id}>
+              {project.name}
+            </option>
+          ))}
         </select>
       </label>
 
@@ -82,7 +122,11 @@ function IssueForm({ onSubmit, onCancel }: IssueFormProps) {
         <button type="button" className="secondary-button" onClick={onCancel}>
           취소
         </button>
-        <button type="submit" className="primary-button">
+        <button
+          type="submit"
+          className="primary-button"
+          disabled={isLoadingProjects || projects.length === 0}
+        >
           저장
         </button>
       </div>
