@@ -403,6 +403,10 @@ public class IssuesPanel extends BasePanel {
         assigneeField.setText("");
         titleSearchField.setText("");
         issueTable.clearSelection();
+
+        if (tableModel != null) {
+            tableModel.setRowCount(0);
+        }
     }
 
     @Override

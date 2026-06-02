@@ -117,6 +117,15 @@ public class MainFrame extends JFrame {
             projectsPanel.setAdmin(currentUser != null && currentUser.hasRole(Role.ADMIN));
         }
 
+        if (contentCardLayout != null && contentAreaPanel != null && navigationPanel != null) {
+            contentCardLayout.show(contentAreaPanel, PROJECTS_CARD);
+            navigationPanel.selectButton(NavigationPanel.NavigationListener.PROJECTS);
+
+            if (projectsPanel != null) {
+                projectsPanel.onActivate();
+            }
+        }
+
         cardLayout.show(contentPanel, MAIN_CARD);
     }
 
