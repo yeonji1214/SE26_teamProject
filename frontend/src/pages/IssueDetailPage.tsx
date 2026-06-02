@@ -153,13 +153,15 @@ function IssueDetailPage() {
                     <br />
                     score: {recommendation.score}
                     <br />
-                    matched terms: {recommendation.matchedTerms.join(", ")}
+                    matched issues: {recommendation.matchedIssueCount}
                     <br />
-                    evidence:{" "}
-                    {recommendation.evidenceIssueTitles.join(", ") || "-"}
+                    matched terms: {recommendation.matchedTerms.join(", ") || "-"}
                     <br />
-                    open assigned issues:{" "}
-                    {recommendation.currentOpenAssignedIssueCount}
+                    evidence: {recommendation.evidenceIssueTitles.join(", ") || "-"}
+                    <br />
+                    open assigned issues: {recommendation.currentOpenAssignedIssueCount}
+                    <br />
+                    reason: {recommendation.explanation}
                   </li>
                 ))}
               </ul>

@@ -43,6 +43,28 @@ function StatisticsPage() {
     }));
   }, [statistics]);
 
+  const priorityStats = useMemo(() => {
+    if (!statistics) {
+      return [];
+    }
+
+    return Object.entries(statistics.byPriority).map(([label, count]) => ({
+      label,
+      count,
+    }));
+  }, [statistics]);
+
+  const dailyRows = useMemo(() => {
+    if (!statistics) {
+      return [];
+    }
+
+    return Object.entries(statistics.byDay).map(([period, created]) => ({
+      period,
+      created,
+    }));
+  }, [statistics]);
+
   const monthlyTrendRows = useMemo(() => {
     if (!statistics) {
       return [];
@@ -56,14 +78,31 @@ function StatisticsPage() {
     }));
   }, [statistics]);
 
+  const assigneeRows = useMemo(() => {
+    if (!statistics) {
+      return [];
+    }
+
+    return Object.entries(statistics.byAssignee).map(([assignee, count]) => ({
+      assignee,
+      count,
+    }));
+  }, [statistics]);
+
   const totalIssues = statistics?.totalIssues ?? 0;
+
   const openIssues =
-    (statistics?.byStatus.NEW ?? 0) +
-    (statistics?.byStatus.ASSIGNED ?? 0) +
-    (statistics?.byStatus.REOPENED ?? 0);
+    (statistics?.byStatus["NEW"] ?? 0) +
+    (statistics?.byStatus["ASSIGNED"] ?? 0) +
+    (statistics?.byStatus["REOPENED"] ?? 0);
 
   const resolvedIssues =
-    (statistics?.byStatus.RESOLVED ?? 0) + (statistics?.byStatus.CLOSED ?? 0);
+    (statistics?.byStatus["RESOLVED"] ?? 0) +
+    (statistics?.byStatus["CLOSED"] ?? 0);
+
+  const highPriorityIssues =
+    (statistics?.byPriority["BLOCKER"] ?? 0) +
+    (statistics?.byPriority["CRITICAL"] ?? 0);
 
   const resolutionRate =
     totalIssues === 0 ? 0 : Math.round((resolvedIssues / totalIssues) * 100);
@@ -73,7 +112,7 @@ function StatisticsPage() {
       <div className="page-header-row">
         <div>
           <h2>통계</h2>
-          <p>백엔드 API에서 이슈 발생 현황과 처리 추이를 확인합니다.</p>
+          <p>백엔드 API에서 이슈 발생 현황, 우선순위, 담당자 분포를 확인합니다.</p>
         </div>
       </div>
 
@@ -99,6 +138,11 @@ function StatisticsPage() {
               description="RESOLVED, CLOSED"
             />
             <StatisticSummaryCard
+              label="고우선순위"
+              value={highPriorityIssues}
+              description="BLOCKER, CRITICAL"
+            />
+            <StatisticSummaryCard
               label="해결률"
               value={resolutionRate}
               description="%"
@@ -106,17 +150,67 @@ function StatisticsPage() {
           </div>
 
           <IssueStatusChart items={statusStats} />
+
+          <article className="statistics-card">
+            <h3>우선순위별 이슈 분포</h3>
+            <table className="issue-trend-table">
+              <thead>
+                <tr>
+                  <th>우선순위</th>
+                  <th>이슈 수</th>
+                </tr>
+              </thead>
+              <tbody>
+                {priorityStats.map((item) => (
+                  <tr key={item.label}>
+                    <td>{item.label}</td>
+                    <td>{item.count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </article>
+
           <IssueTrendTable rows={monthlyTrendRows} />
 
           <article className="statistics-card">
+            <h3>일별 이슈 발생 수</h3>
+            <table className="issue-trend-table">
+              <thead>
+                <tr>
+                  <th>날짜</th>
+                  <th>생성</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dailyRows.map((row) => (
+                  <tr key={row.period}>
+                    <td>{row.period}</td>
+                    <td>{row.created}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </article>
+
+          <article className="statistics-card">
             <h3>담당자별 이슈 수</h3>
-            <ul>
-              {Object.entries(statistics.byAssignee).map(([assignee, count]) => (
-                <li key={assignee}>
-                  {assignee}: {count}
-                </li>
-              ))}
-            </ul>
+            <table className="issue-trend-table">
+              <thead>
+                <tr>
+                  <th>담당자</th>
+                  <th>이슈 수</th>
+                </tr>
+              </thead>
+              <tbody>
+                {assigneeRows.map((row) => (
+                  <tr key={row.assignee}>
+                    <td>{row.assignee}</td>
+                    <td>{row.count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </article>
         </>
       )}
