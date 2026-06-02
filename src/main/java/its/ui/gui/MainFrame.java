@@ -1,7 +1,9 @@
 package its.ui.gui;
 
+import its.domain.issue.Issue;
 import its.domain.issue.IssueStatus;
 import its.domain.issue.Priority;
+import its.domain.project.Project;
 import its.domain.user.User;
 import its.service.ApplicationServices;
 import its.service.DemoDataSeeder;
@@ -144,11 +146,14 @@ public class MainFrame extends JFrame {
         issuesPanel.setServices(services.getIssueService(), services.getProjectService());
 
         CreateIssuePanel createIssuePanel = new CreateIssuePanel();
+        createIssuePanel.setProjectService(services.getProjectService());
+
         IssueDetailPanel issueDetailPanel = new IssueDetailPanel();
 
         issuesPanel.setIssueActionListener(new IssuesPanel.IssueActionListener() {
             @Override
             public void onCreateIssueRequested() {
+                createIssuePanel.clear();
                 contentCardLayout.show(contentAreaPanel, CREATE_ISSUE_CARD);
                 navigationPanel.selectButton(NavigationPanel.NavigationListener.CREATE_ISSUES);
             }
@@ -178,12 +183,7 @@ public class MainFrame extends JFrame {
 
             @Override
             public void onSaveRequested(String project, String title, String description, Priority priority) {
-                System.out.println("[MainFrame] Create Issue Save Requested");
-                System.out.println("[MainFrame] Selected Project: " + project);
-                System.out.println("[MainFrame] Entered Title: " + title);
-                System.out.println("[MainFrame] Entered Description: " + description);
-                System.out.println("[MainFrame] Selected Priority: " + priority);
-                // TODO: validation 및 DB 저장 로직 호출
+                handleCreateIssue(project, title, description, priority, issuesPanel, createIssuePanel);
             }
         });
 
@@ -197,28 +197,29 @@ public class MainFrame extends JFrame {
 
             @Override
             public void onIssueEditRequested(int issueId) {
-                System.out.println("[MainFrame] Issue Detail Edit Requested");
-                System.out.println("[MainFrame] Selected Issue: " + issueId);
-                createIssuePanel.loadIssue(issueId);
-                contentCardLayout.show(contentAreaPanel, CREATE_ISSUE_CARD);
-                navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
+                JOptionPane.showMessageDialog(
+                        MainFrame.this,
+                        "현재 버전에서는 이슈 수정 기능은 지원하지 않습니다.",
+                        "Not Supported",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
             }
 
             @Override
             public void onIssueDeleteRequested(int issueId) {
-                System.out.println("[MainFrame] Issue Detail Delete Requested");
-                System.out.println("[MainFrame] Selected Issue: " + issueId);
-                // TODO: 정말 삭제하겠습니까? 팝업 띄우기(handleLogout 참고)
-                contentCardLayout.show(contentAreaPanel, ISSUES_CARD);
-                // TODO: 이슈 제거 로직 호출
-                navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
+                JOptionPane.showMessageDialog(
+                        MainFrame.this,
+                        "현재 버전에서는 이슈 삭제 기능은 지원하지 않습니다.",
+                        "Not Supported",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
             }
 
             @Override
             public void onStatusChangeRequested(int issueId, IssueStatus status, String comment) {
                 System.out.println("[MainFrame] Issue Detail Change Requested");
                 System.out.println("[MainFrame] Selected Issue: " + issueId);
-                // TODO: 코멘트 등록 로직 호출
+                // 상태 변경 연결은 다음 커밋에서 처리한다.
             }
         });
 
@@ -231,6 +232,69 @@ public class MainFrame extends JFrame {
         panel.add(contentAreaPanel, BorderLayout.CENTER);
 
         return panel;
+    }
+
+    private void handleCreateIssue(
+            String projectName,
+            String title,
+            String description,
+            Priority priority,
+            IssuesPanel issuesPanel,
+            CreateIssuePanel createIssuePanel
+    ) {
+        try {
+            if (currentUser == null) {
+                throw new IllegalStateException("current user is not set");
+            }
+
+            validateIssueForm(projectName, title, description);
+
+            Project project = findProjectByName(projectName);
+
+            Issue created = services.getIssueService().createIssue(
+                    project.getId(),
+                    title.trim(),
+                    description.trim(),
+                    currentUser.getId(),
+                    priority
+            );
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "이슈가 등록되었습니다. Issue #" + created.getId(),
+                    "Issue Created",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            createIssuePanel.clear();
+            issuesPanel.refreshIssues();
+
+            contentCardLayout.show(contentAreaPanel, ISSUES_CARD);
+            navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
+        } catch (Exception e) {
+            showError("Issue Create Error", e);
+        }
+    }
+
+    private void validateIssueForm(String projectName, String title, String description) {
+        if (projectName == null || projectName.isBlank()) {
+            throw new IllegalArgumentException("project must be selected");
+        }
+
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("title must not be blank");
+        }
+
+        if (description == null || description.isBlank()) {
+            throw new IllegalArgumentException("description must not be blank");
+        }
+    }
+
+    private Project findProjectByName(String projectName) {
+        return services.getProjectService().getAllProjects().stream()
+                .filter(project -> project.getName().equals(projectName))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("project not found: " + projectName));
     }
 
     private void handleLogout() {
@@ -270,5 +334,14 @@ public class MainFrame extends JFrame {
 
     private String currentUsername() {
         return currentUser == null ? "" : currentUser.getUsername();
+    }
+
+    private void showError(String title, Exception e) {
+        JOptionPane.showMessageDialog(
+                this,
+                e.getMessage(),
+                title,
+                JOptionPane.ERROR_MESSAGE
+        );
     }
 }
