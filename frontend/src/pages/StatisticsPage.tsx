@@ -86,28 +86,6 @@ function StatisticsPage() {
     }));
   }, [statistics]);
 
-  const priorityStats = useMemo(() => {
-    if (!statistics) {
-      return [];
-    }
-
-    return Object.entries(statistics.byPriority).map(([label, count]) => ({
-      label,
-      count,
-    }));
-  }, [statistics]);
-
-  const dailyRows = useMemo(() => {
-    if (!statistics) {
-      return [];
-    }
-
-    return Object.entries(statistics.byDay).map(([period, created]) => ({
-      period,
-      created,
-    }));
-  }, [statistics]);
-
   const monthlyTrendRows = useMemo(() => {
     if (!statistics) {
       return [];
@@ -121,23 +99,12 @@ function StatisticsPage() {
     }));
   }, [statistics]);
 
-  const assigneeRows = useMemo(() => {
-    if (!statistics) {
-      return [];
-    }
-
-    return Object.entries(statistics.byAssignee).map(([assignee, count]) => ({
-      assignee,
-      count,
-    }));
-  }, [statistics]);
-
   const totalIssues = statistics?.totalIssues ?? 0;
 
   const openIssues =
-    (statistics?.byStatus["NEW"] ?? 0) +
-    (statistics?.byStatus["ASSIGNED"] ?? 0) +
-    (statistics?.byStatus["REOPENED"] ?? 0);
+    (statistics?.byStatus.NEW ?? 0) +
+    (statistics?.byStatus.ASSIGNED ?? 0) +
+    (statistics?.byStatus.REOPENED ?? 0);
 
   const resolvedIssues =
     (statistics?.byStatus.RESOLVED ?? 0) +
@@ -205,11 +172,6 @@ function StatisticsPage() {
               label="해결된 이슈"
               value={resolvedIssues}
               description="RESOLVED / CLOSED"
-            />
-            <StatisticSummaryCard
-              label="고우선순위"
-              value={highPriorityIssues}
-              description="BLOCKER, CRITICAL"
             />
             <StatisticSummaryCard
               label="해결률"
