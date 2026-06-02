@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getIssueById, updateIssueStatus } from "../api/issueApi";
+import {
+  getIssueById,
+  updateIssueStatus,
+  addIssueComment,
+} from "../api/issueApi";
 import { getAssigneeRecommendations } from "../api/recommendationApi";
 import CommentList from "../components/CommentListPanel";
 import IssueActionPanel from "../components/IssueActionPanel";
@@ -51,6 +55,52 @@ function IssueDetailPage() {
     }
   };
 
+  const refreshRecommendations = async (id: number) => {
+    try {
+      const recommendationData = await getAssigneeRecommendations(id, 3);
+      setRecommendations(recommendationData);
+    } catch {
+      setRecommendations([]);
+    }
+  };
+
+  const handleAddComment = async () => {
+    if (!issue) {
+      return;
+    }
+
+    const trimmedComment = comment.trim();
+
+    if (!trimmedComment) {
+      alert("코멘트를 입력해 주세요.");
+      return;
+    }
+
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      alert("로그인 정보가 없습니다.");
+      return;
+    }
+
+    try {
+      const updatedIssue = await addIssueComment(
+        issue.id,
+        currentUser.id,
+        trimmedComment
+      );
+
+      setIssue(updatedIssue);
+      setComment("");
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "코멘트 추가 중 오류가 발생했습니다."
+      );
+    }
+  };
+
   const handleApplyStatus = async () => {
     if (!issue) {
       return;
@@ -62,14 +112,43 @@ function IssueDetailPage() {
       const updatedIssue = await updateIssueStatus(issue.id, {
         status: nextStatus,
         actorId: currentUser?.id,
-        comment,
+      });
+
+      setIssue(updatedIssue);
+      await refreshRecommendations(issue.id);
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "상태 변경 중 오류가 발생했습니다."
+      );
+    }
+  };
+
+  const handleApplyStatusWithComment = async () => {
+    if (!issue) {
+      return;
+    }
+
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      alert("로그인 정보가 없습니다.");
+      return;
+    }
+
+    const trimmedComment = comment.trim();
+
+    try {
+      const updatedIssue = await updateIssueStatus(issue.id, {
+        status: nextStatus,
+        actorId: currentUser.id,
+        comment: trimmedComment || undefined,
       });
 
       setIssue(updatedIssue);
       setComment("");
-
-      const recommendationData = await getAssigneeRecommendations(issue.id, 3);
-      setRecommendations(recommendationData);
+      await refreshRecommendations(issue.id);
     } catch (error) {
       alert(
         error instanceof Error
@@ -140,11 +219,14 @@ function IssueDetailPage() {
             comment={comment}
             onNextStatusChange={setNextStatus}
             onCommentChange={setComment}
+            onAddComment={handleAddComment}
             onApplyStatus={handleApplyStatus}
+            onApplyStatusWithComment={handleApplyStatusWithComment}
           />
 
           <article className="issue-side-card">
             <h3>추천 담당자</h3>
+
             {recommendations.length > 0 ? (
               <ul>
                 {recommendations.map((recommendation) => (
