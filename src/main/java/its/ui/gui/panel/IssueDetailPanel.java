@@ -1,7 +1,9 @@
 package its.ui.gui.panel;
 
 import its.domain.issue.Comment;
+import its.domain.issue.Issue;
 import its.domain.issue.IssueStatus;
+import its.service.IssueService;
 import its.ui.gui.common.UIConstants;
 
 import javax.swing.*;
@@ -10,8 +12,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class IssueDetailPanel extends BasePanel {
-
-    // 액션 컴포넌트
     private JLabel backButton;
     private JButton editButton;
     private JButton deleteButton;
@@ -19,7 +19,6 @@ public class IssueDetailPanel extends BasePanel {
     private JComboBox<IssueStatus> statusComboBox;
     private JTextArea commentTextArea;
 
-    // 데이터 표시 컴포넌트
     private JLabel titleLabel;
     private JLabel issueIdLabel;
     private JLabel projectValue;
@@ -31,14 +30,16 @@ public class IssueDetailPanel extends BasePanel {
     private JLabel priorityValue;
     private JTextArea descriptionArea;
 
-    // 코멘트 영역
     private JPanel commentListPanel;
 
-    // 액션리스너
     private IssueDetailActionListener listener;
+    private IssueService issueService;
 
     private int currentIssueId;
 
+    public void setIssueService(IssueService issueService) {
+        this.issueService = issueService;
+    }
 
     @Override
     protected void initComponents() {
@@ -51,6 +52,7 @@ public class IssueDetailPanel extends BasePanel {
         fixerValue = new JLabel("수행자 없음");
         statusValue = new JLabel("상태 없음");
         priorityValue = new JLabel("우선순위 없음");
+
         descriptionArea = new JTextArea("설명 없음");
         descriptionArea.setEditable(false);
         descriptionArea.setLineWrap(true);
@@ -61,12 +63,17 @@ public class IssueDetailPanel extends BasePanel {
         editButton = createStyledButton("수정");
         deleteButton = createStyledButton("삭제", UIConstants.ButtonType.DANGER);
         statusChangeButton = createStyledButton("상태 변경", UIConstants.ButtonType.PRIMARY);
+
         statusComboBox = new JComboBox<>(IssueStatus.values());
+
         commentTextArea = new JTextArea();
         commentTextArea.setRows(6);
+        commentTextArea.setLineWrap(true);
+        commentTextArea.setWrapStyleWord(true);
 
         commentListPanel = new JPanel();
         commentListPanel.setLayout(new BoxLayout(commentListPanel, BoxLayout.Y_AXIS));
+        commentListPanel.setBackground(UIConstants.CARD_COLOR);
 
         JScrollPane scrollPane = new JScrollPane(createContentPanel());
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -85,11 +92,15 @@ public class IssueDetailPanel extends BasePanel {
         });
 
         editButton.addActionListener(e -> {
-            if (listener != null) {listener.onIssueEditRequested(currentIssueId);}
+            if (listener != null) {
+                listener.onIssueEditRequested(currentIssueId);
+            }
         });
 
         deleteButton.addActionListener(e -> {
-            if (listener != null) {listener.onIssueDeleteRequested(currentIssueId);}
+            if (listener != null) {
+                listener.onIssueDeleteRequested(currentIssueId);
+            }
         });
 
         statusChangeButton.addActionListener(e -> {
@@ -108,7 +119,7 @@ public class IssueDetailPanel extends BasePanel {
         gbc.gridx = 0;
         gbc.weightx = 1.0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(0,0,10,0);
+        gbc.insets = new Insets(0, 0, 10, 0);
 
         gbc.gridy = 0;
         panel.add(createHeaderPanel(), gbc);
@@ -122,7 +133,7 @@ public class IssueDetailPanel extends BasePanel {
         gbc.anchor = GridBagConstraints.NORTH;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weighty = 0.3;
-        gbc.insets = new Insets(20,0,0,0);
+        gbc.insets = new Insets(20, 0, 0, 0);
         panel.add(createCommentPanel(), gbc);
 
         return panel;
@@ -137,7 +148,7 @@ public class IssueDetailPanel extends BasePanel {
         backButton.setForeground(UIConstants.PRIMARY_BUTTON_COLOR);
 
         northPanel.add(backButton);
-        northPanel.setBorder(BorderFactory.createEmptyBorder(0,0,10,0));
+        northPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
         panel.add(northPanel, BorderLayout.NORTH);
 
         JPanel centerPanel = new JPanel();
@@ -154,7 +165,6 @@ public class IssueDetailPanel extends BasePanel {
         panel.add(centerPanel, BorderLayout.CENTER);
 
         JPanel eastPanel = new JPanel();
-
         eastPanel.add(editButton);
         eastPanel.add(deleteButton);
         panel.add(eastPanel, BorderLayout.EAST);
@@ -171,13 +181,15 @@ public class IssueDetailPanel extends BasePanel {
         gbc.weighty = 1.0;
         gbc.anchor = GridBagConstraints.NORTH;
         gbc.gridx = 0;
-        gbc.insets = new Insets(0,0,0,10);
+        gbc.insets = new Insets(0, 0, 0, 10);
+
         JPanel infoCard = createInfoCard();
         infoCard.setPreferredSize(new Dimension(0, 0));
         panel.add(infoCard, gbc);
 
         gbc.weightx = 0.5;
         gbc.gridx = 1;
+
         JPanel descriptionCard = createDescriptionCard();
         descriptionCard.setPreferredSize(new Dimension(0, 0));
         panel.add(descriptionCard, gbc);
@@ -185,6 +197,7 @@ public class IssueDetailPanel extends BasePanel {
         gbc.weightx = 0.25;
         gbc.gridx = 2;
         gbc.insets = new Insets(0, 0, 0, 0);
+
         JPanel actionCard = createActionCard();
         actionCard.setPreferredSize(new Dimension(0, 0));
         panel.add(actionCard, gbc);
@@ -198,12 +211,15 @@ public class IssueDetailPanel extends BasePanel {
 
         JLabel title = new JLabel("코멘트");
         title.setFont(UIConstants.SUBTITLE_FONT);
-        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+        title.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         panel.add(title, BorderLayout.NORTH);
 
-        panel.add(commentListPanel, BorderLayout.CENTER);
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setBackground(UIConstants.CARD_COLOR);
+        wrapper.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        wrapper.add(commentListPanel, BorderLayout.CENTER);
 
-        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(wrapper, BorderLayout.CENTER);
 
         return panel;
     }
@@ -212,6 +228,7 @@ public class IssueDetailPanel extends BasePanel {
         JPanel card = new JPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBackground(UIConstants.CARD_COLOR);
+        card.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
         JLabel title = new JLabel("이슈 정보");
         title.setFont(UIConstants.SUBTITLE_FONT);
@@ -240,6 +257,7 @@ public class IssueDetailPanel extends BasePanel {
         JPanel card = new JPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBackground(UIConstants.CARD_COLOR);
+        card.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
         JLabel title = new JLabel("설명");
         title.setFont(UIConstants.SUBTITLE_FONT);
@@ -259,6 +277,7 @@ public class IssueDetailPanel extends BasePanel {
         JPanel card = new JPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBackground(UIConstants.CARD_COLOR);
+        card.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
         JLabel title = new JLabel("작업");
         title.setFont(UIConstants.SUBTITLE_FONT);
@@ -275,7 +294,7 @@ public class IssueDetailPanel extends BasePanel {
         statusComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
         statusComboBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, statusComboBox.getPreferredSize().height));
         card.add(statusComboBox);
-        card.add(Box.createVerticalStrut(5));
+        card.add(Box.createVerticalStrut(10));
 
         JLabel commentLabel = new JLabel("코멘트");
         commentLabel.setFont(UIConstants.LABEL_FONT);
@@ -287,7 +306,7 @@ public class IssueDetailPanel extends BasePanel {
         scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
         scrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
         card.add(scrollPane);
-        card.add(Box.createVerticalStrut(5));
+        card.add(Box.createVerticalStrut(10));
 
         statusChangeButton.setAlignmentX(Component.LEFT_ALIGNMENT);
         card.add(statusChangeButton);
@@ -302,7 +321,9 @@ public class IssueDetailPanel extends BasePanel {
 
         JLabel label = new JLabel(labelText);
         label.setFont(UIConstants.LABEL_FONT);
-        label.setPreferredSize(new Dimension(50, 15));
+        label.setPreferredSize(new Dimension(60, 20));
+
+        valueLabel.setFont(UIConstants.LABEL_FONT);
 
         panel.add(label);
         panel.add(valueLabel);
@@ -314,15 +335,21 @@ public class IssueDetailPanel extends BasePanel {
     private JPanel createCommentCard(Comment comment) {
         JPanel card = new JPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBackground(new Color(230, 230, 230));
+        card.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        card.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setOpaque(false);
+
         JLabel author = new JLabel(comment.getAuthor().getUsername());
+        author.setFont(UIConstants.HEADER_FONT);
+
         JLabel date = new JLabel(comment.getCreatedAt().format(UIConstants.DATE_TIME_FORMATTER));
+        date.setFont(UIConstants.LABEL_FONT);
 
         topPanel.add(author, BorderLayout.WEST);
         topPanel.add(date, BorderLayout.EAST);
-
-        card.add(topPanel);
 
         JTextArea commentArea = new JTextArea(comment.getContent());
         commentArea.setEditable(false);
@@ -331,6 +358,8 @@ public class IssueDetailPanel extends BasePanel {
         commentArea.setOpaque(false);
         commentArea.setFocusable(false);
 
+        card.add(topPanel);
+        card.add(Box.createVerticalStrut(4));
         card.add(commentArea);
 
         return card;
@@ -339,8 +368,48 @@ public class IssueDetailPanel extends BasePanel {
     public void loadIssue(int issueId) {
         currentIssueId = issueId;
 
+        if (issueService == null) {
+            return;
+        }
+
+        Issue issue = issueService.getIssue((long) issueId);
+
+        titleLabel.setText(issue.getTitle());
+        issueIdLabel.setText("Issue #" + issue.getId());
+        projectValue.setText(issue.getProject().getName());
+        reporterValue.setText(issue.getReporter().getUsername());
+        dateValue.setText(issue.getReportedDate().format(UIConstants.DATE_TIME_FORMATTER));
+        assigneeValue.setText(issue.getAssignee() == null ? "-" : issue.getAssignee().getUsername());
+        fixerValue.setText(issue.getFixer() == null ? "-" : issue.getFixer().getUsername());
+        statusValue.setText(issue.getStatus().name());
+        priorityValue.setText(issue.getPriority().name());
+        descriptionArea.setText(issue.getDescription());
+        statusComboBox.setSelectedItem(issue.getStatus());
+        commentTextArea.setText("");
+
+        refreshComments(issueId);
+    }
+
+    private void refreshComments(int issueId) {
         commentListPanel.removeAll();
-        // TODO: 서비스에서 코멘트 목록 가져와서 코멘트 수만큼 카드 생성하고 추가
+
+        if (issueService == null) {
+            return;
+        }
+
+        java.util.List<Comment> comments = issueService.getComments((long) issueId);
+
+        if (comments.isEmpty()) {
+            JLabel emptyLabel = new JLabel("등록된 코멘트가 없습니다.");
+            emptyLabel.setFont(UIConstants.LABEL_FONT);
+            commentListPanel.add(emptyLabel);
+        } else {
+            for (Comment comment : comments) {
+                commentListPanel.add(createCommentCard(comment));
+                commentListPanel.add(Box.createVerticalStrut(8));
+            }
+        }
+
         commentListPanel.revalidate();
         commentListPanel.repaint();
     }
@@ -351,8 +420,11 @@ public class IssueDetailPanel extends BasePanel {
 
     public interface IssueDetailActionListener {
         void onBackRequested();
+
         void onIssueEditRequested(int issueId);
+
         void onIssueDeleteRequested(int issueId);
+
         void onStatusChangeRequested(int issueId, IssueStatus newStatus, String comment);
     }
 }
