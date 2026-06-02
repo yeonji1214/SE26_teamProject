@@ -17,8 +17,6 @@ import java.awt.event.MouseEvent;
 
 public class IssueDetailPanel extends BasePanel {
     private JLabel backButton;
-    private JButton editButton;
-    private JButton deleteButton;
     private JButton statusChangeButton;
     private JComboBox<IssueStatus> statusComboBox;
     private JComboBox<User> assigneeComboBox;
@@ -89,8 +87,6 @@ public class IssueDetailPanel extends BasePanel {
         descriptionArea.setFocusable(false);
 
         backButton = new JLabel("← 이슈 목록으로");
-        editButton = createStyledButton("수정");
-        deleteButton = createStyledButton("삭제", UIConstants.ButtonType.DANGER);
         statusChangeButton = createStyledButton("상태 변경", UIConstants.ButtonType.PRIMARY);
 
         statusComboBox = new JComboBox<>(IssueStatus.values());
@@ -123,18 +119,6 @@ public class IssueDetailPanel extends BasePanel {
                 if (listener != null) {
                     listener.onBackRequested();
                 }
-            }
-        });
-
-        editButton.addActionListener(e -> {
-            if (listener != null) {
-                listener.onIssueEditRequested(currentIssueId);
-            }
-        });
-
-        deleteButton.addActionListener(e -> {
-            if (listener != null) {
-                listener.onIssueDeleteRequested(currentIssueId);
             }
         });
 
@@ -203,18 +187,15 @@ public class IssueDetailPanel extends BasePanel {
 
         titleLabel.setFont(UIConstants.TITLE_FONT);
         titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0,0,5,0));
 
         issueIdLabel.setFont(UIConstants.LABEL_FONT);
+        issueIdLabel.setForeground(Color.GRAY);
         issueIdLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         centerPanel.add(titleLabel);
         centerPanel.add(issueIdLabel);
         panel.add(centerPanel, BorderLayout.CENTER);
-
-        JPanel eastPanel = new JPanel();
-        eastPanel.add(editButton);
-        eastPanel.add(deleteButton);
-        panel.add(eastPanel, BorderLayout.EAST);
 
         return panel;
     }
@@ -603,10 +584,6 @@ public class IssueDetailPanel extends BasePanel {
 
     public interface IssueDetailActionListener {
         void onBackRequested();
-
-        void onIssueEditRequested(int issueId);
-
-        void onIssueDeleteRequested(int issueId);
 
         void onStatusChangeRequested(int issueId, IssueStatus newStatus, Long assigneeId, String comment);
     }

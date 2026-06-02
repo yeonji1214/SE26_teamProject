@@ -20,8 +20,6 @@ public class CreateIssuePanel extends BasePanel {
 
     private CreateIssueActionListener listener;
 
-    private boolean isEditMode = false;
-    private int currentIssueId;
     private JLabel formTitleLabel;
 
     private ProjectService projectService;
@@ -54,11 +52,7 @@ public class CreateIssuePanel extends BasePanel {
     protected void setupListeners() {
         cancelButton.addActionListener(e -> {
             if (listener != null) {
-                if (isEditMode) {
-                    listener.onCancelFromEditRequested(currentIssueId);
-                } else {
-                    listener.onCancelRequested();
-                }
+                listener.onCancelRequested();
             }
         });
 
@@ -215,24 +209,10 @@ public class CreateIssuePanel extends BasePanel {
         void onSaveRequested(String project, String title, String description, Priority priority);
 
         void onCancelRequested();
-
-        void onCancelFromEditRequested(int issueId);
-    }
-
-    public void loadIssue(int issueId) {
-        isEditMode = true;
-        currentIssueId = issueId;
-
-        formTitleLabel.setText("이슈 수정");
-        saveButton.setText("수정");
-
-        // 이슈 수정 기능은 이후 커밋에서 별도로 연결한다.
     }
 
     @Override
     public void clear() {
-        isEditMode = false;
-        currentIssueId = -1;
         formTitleLabel.setText("이슈 등록");
         saveButton.setText("저장");
 
@@ -251,9 +231,7 @@ public class CreateIssuePanel extends BasePanel {
     public void onActivate() {
         refreshProjects();
 
-        if (!isEditMode) {
-            clear();
-        }
+        clear();
 
         titleTextField.requestFocusInWindow();
     }

@@ -189,15 +189,6 @@ public class MainFrame extends JFrame {
             }
 
             @Override
-            public void onCancelFromEditRequested(int issueId) {
-                issueDetailPanel.setAssignable(currentUser != null
-                        && (currentUser.hasRole(Role.PL) || currentUser.hasRole(Role.ADMIN)));
-                issueDetailPanel.loadIssue(issueId);
-                contentCardLayout.show(contentAreaPanel, ISSUE_DETAIL_CARD);
-                navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
-            }
-
-            @Override
             public void onSaveRequested(String project, String title, String description, Priority priority) {
                 handleCreateIssue(project, title, description, priority, issuesPanel, createIssuePanel, statisticsPanel);
             }
@@ -209,26 +200,6 @@ public class MainFrame extends JFrame {
                 System.out.println("[MainFrame] Issue Detail Back Requested");
                 contentCardLayout.show(contentAreaPanel, ISSUES_CARD);
                 navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
-            }
-
-            @Override
-            public void onIssueEditRequested(int issueId) {
-                JOptionPane.showMessageDialog(
-                        MainFrame.this,
-                        "현재 버전에서는 이슈 수정 기능은 지원하지 않습니다.",
-                        "Not Supported",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-            }
-
-            @Override
-            public void onIssueDeleteRequested(int issueId) {
-                JOptionPane.showMessageDialog(
-                        MainFrame.this,
-                        "현재 버전에서는 이슈 삭제 기능은 지원하지 않습니다.",
-                        "Not Supported",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
             }
 
             @Override
