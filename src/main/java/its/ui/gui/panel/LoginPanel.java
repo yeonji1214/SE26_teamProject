@@ -1,18 +1,24 @@
 package its.ui.gui.panel;
 
-import its.ui.gui.common.UIConstants;
-import its.ui.gui.common.PlaceholderTextField;
+import its.domain.user.User;
+import its.service.UserService;
 import its.ui.gui.common.PlaceholderPasswordField;
+import its.ui.gui.common.PlaceholderTextField;
+import its.ui.gui.common.UIConstants;
+
 import javax.swing.*;
 import java.awt.*;
 
-
-public class LoginPanel extends BasePanel{
-    // UI Components
+public class LoginPanel extends BasePanel {
     private PlaceholderTextField usernameField;
     private PlaceholderPasswordField passwordField;
     private JButton loginButton;
     private LoginListener loginListener;
+    private UserService userService;
+
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     protected void setupLayout() {
@@ -74,33 +80,56 @@ public class LoginPanel extends BasePanel{
         String password = new String(passwordField.getPassword());
 
         if (username.isEmpty() || password.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
+            JOptionPane.showMessageDialog(
+                    this,
                     "Please enter both username and password",
                     "Login Error",
-                    JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.ERROR_MESSAGE
+            );
             return;
         }
 
-        // TODO: Service 호출
+        if (userService == null) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "UserService is not connected.",
+                    "Login Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
 
-        System.out.println("[LoginPanel] Login: " + username);
+        try {
+            User user = userService.getUserByUsername(username);
 
-        if (loginListener != null) {
-            loginListener.onLoginSuccess(username);
+            if (!user.getPassword().equals(password)) {
+                throw new IllegalArgumentException("invalid password");
+            }
+
+            if (loginListener != null) {
+                loginListener.onLoginSuccess(user);
+            }
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    e.getMessage(),
+                    "Login Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
     @Override
-    public void clear(){
+    public void clear() {
         usernameField.setText("");
         passwordField.setText("");
     }
 
-    public void setLoginListener(LoginListener listener){
+    public void setLoginListener(LoginListener listener) {
         this.loginListener = listener;
     }
 
     public interface LoginListener {
-        void onLoginSuccess(String username);
+        void onLoginSuccess(User user);
     }
 }

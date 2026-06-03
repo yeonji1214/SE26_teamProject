@@ -1,14 +1,32 @@
 package its.ui.gui;
 
+import its.domain.issue.Issue;
 import its.domain.issue.IssueStatus;
 import its.domain.issue.Priority;
-import its.ui.gui.common.UIConstants;
+import its.domain.project.Project;
+import its.domain.user.Role;
+import its.domain.user.User;
+import its.service.ApplicationServices;
+import its.service.AssigneeRecommendation;
+import its.service.DemoDataSeeder;
+import its.service.ServiceFactory;
 import its.ui.gui.panel.*;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Component;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Objects;
 
 public class MainFrame extends JFrame {
+    private static final Path DATABASE_PATH = Path.of("issue-tracker.db");
+
+    private final ApplicationServices services;
+
     private CardLayout cardLayout;
     private JPanel contentPanel;
     private LoginPanel loginPanel;
@@ -17,7 +35,10 @@ public class MainFrame extends JFrame {
     private NavigationPanel navigationPanel;
     private CardLayout contentCardLayout;
     private JPanel contentAreaPanel;
-    private String currentUser;
+    private User currentUser;
+
+    private ProjectsPanel projectsPanel;
+    private UsersPanel usersPanel;
 
     private static final String LOGIN_CARD = "LOGIN";
     private static final String MAIN_CARD = "MAIN";
@@ -27,8 +48,15 @@ public class MainFrame extends JFrame {
     private static final String CREATE_ISSUE_CARD = "CREATE_ISSUE";
     private static final String ISSUE_DETAIL_CARD = "ISSUE_DETAIL";
     private static final String STATISTICS_CARD = "STATISTICS";
+    private static final String USERS_CARD = "USERS";
 
     public MainFrame() {
+        this(createDefaultServices());
+    }
+
+    public MainFrame(ApplicationServices services) {
+        this.services = Objects.requireNonNull(services, "services must not be null");
+
         setTitle("ITS");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -37,15 +65,20 @@ public class MainFrame extends JFrame {
         initComponents();
     }
 
+    private static ApplicationServices createDefaultServices() {
+        ApplicationServices services = ServiceFactory.createWithSqliteDatabase(DATABASE_PATH);
+        new DemoDataSeeder(services).seedIfEmpty();
+        return services;
+    }
+
     private void initComponents() {
-        // Set CardLayout
         cardLayout = new CardLayout();
         contentPanel = new JPanel(cardLayout);
 
-        // Create LoginPanel, add Listener
         loginPanel = new LoginPanel();
-        loginPanel.setLoginListener(username -> {
-            currentUser = username;
+        loginPanel.setUserService(services.getUserService());
+        loginPanel.setLoginListener(user -> {
+            currentUser = user;
             showMainPanel();
         });
 
@@ -60,7 +93,7 @@ public class MainFrame extends JFrame {
     }
 
     private void showLoginPanel() {
-        loginPanel.clear(); // Clear text fields
+        loginPanel.clear();
 
         if (mainPanel != null) {
             clearAllContentPanels();
@@ -70,11 +103,25 @@ public class MainFrame extends JFrame {
     }
 
     private void showMainPanel() {
-        System.out.println("[MainFrame] Switching to MAIN screen ...");
-        System.out.println("[MainFrame] Current User: " + currentUser);
-
         if (titleBarPanel != null) {
-            titleBarPanel.setUsername(currentUser);
+            titleBarPanel.setUsername(currentUsername());
+        }
+
+        if (projectsPanel != null) {
+            projectsPanel.setAdmin(currentUser != null && currentUser.hasRole(Role.ADMIN));
+        }
+
+        if (usersPanel != null) {
+            usersPanel.setAdmin(currentUser != null && currentUser.hasRole(Role.ADMIN));
+        }
+
+        if (contentCardLayout != null && contentAreaPanel != null && navigationPanel != null) {
+            contentCardLayout.show(contentAreaPanel, PROJECTS_CARD);
+            navigationPanel.selectButton(NavigationPanel.NavigationListener.PROJECTS);
+
+            if (projectsPanel != null) {
+                projectsPanel.onActivate();
+            }
         }
 
         cardLayout.show(contentPanel, MAIN_CARD);
@@ -83,37 +130,63 @@ public class MainFrame extends JFrame {
     private JPanel createMainPanel() {
         JPanel panel = new JPanel(new BorderLayout());
 
-        titleBarPanel  = new TitleBarPanel(currentUser);
-        panel.add(titleBarPanel, BorderLayout.NORTH);
+        titleBarPanel = new TitleBarPanel(currentUsername());
 
         navigationPanel = new NavigationPanel();
-        navigationPanel.setNavigationListener(menuName -> {
-            System.out.println("[MainFrame] Menu Selected: " + menuName);
 
+        contentCardLayout = new CardLayout();
+        contentAreaPanel = new JPanel(contentCardLayout);
+
+        projectsPanel = new ProjectsPanel();
+        projectsPanel.setProjectService(services.getProjectService());
+
+        IssuesPanel issuesPanel = new IssuesPanel();
+        issuesPanel.setServices(services.getIssueService(), services.getProjectService());
+
+        CreateIssuePanel createIssuePanel = new CreateIssuePanel();
+        createIssuePanel.setProjectService(services.getProjectService());
+
+        IssueDetailPanel issueDetailPanel = new IssueDetailPanel();
+        issueDetailPanel.setIssueService(services.getIssueService());
+        issueDetailPanel.setUserService(services.getUserService());
+        issueDetailPanel.setRecommendationService(services.getRecommendationService());
+
+        StatisticsPanel statisticsPanel = new StatisticsPanel();
+        statisticsPanel.setStatisticsService(services.getStatisticsService());
+
+        usersPanel = new UsersPanel();
+        usersPanel.setUserService(services.getUserService());
+
+
+        navigationPanel.setNavigationListener(menuName -> {
             if (menuName.equals("LOGOUT")) {
                 handleLogout();
             } else {
                 contentCardLayout.show(contentAreaPanel, menuName);
             }
+
+            switch (menuName) {
+                case PROJECTS_CARD -> projectsPanel.onActivate();
+                case ISSUES_CARD -> issuesPanel.onActivate();
+                case CREATE_ISSUE_CARD -> createIssuePanel.onActivate();
+                case STATISTICS_CARD -> statisticsPanel.onActivate();
+                case USERS_CARD -> usersPanel.onActivate();
+            }
         });
-
-        panel.add(navigationPanel, BorderLayout.WEST);
-
-        contentCardLayout = new CardLayout();
-        contentAreaPanel = new JPanel(contentCardLayout);
-
-        IssuesPanel issuesPanel = new IssuesPanel();
-        CreateIssuePanel createIssuePanel = new CreateIssuePanel();
-        IssueDetailPanel issueDetailPanel = new IssueDetailPanel();
 
         issuesPanel.setIssueActionListener(new IssuesPanel.IssueActionListener() {
             @Override
             public void onCreateIssueRequested() {
+                createIssuePanel.onActivate();
+
                 contentCardLayout.show(contentAreaPanel, CREATE_ISSUE_CARD);
                 navigationPanel.selectButton(NavigationPanel.NavigationListener.CREATE_ISSUES);
             }
 
+            @Override
             public void onIssueSelected(int issueId) {
+                issueDetailPanel.setAssignable(currentUser != null
+                        && (currentUser.hasRole(Role.PL) || currentUser.hasRole(Role.ADMIN)));
                 issueDetailPanel.loadIssue(issueId);
                 contentCardLayout.show(contentAreaPanel, ISSUE_DETAIL_CARD);
                 navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
@@ -123,73 +196,201 @@ public class MainFrame extends JFrame {
         createIssuePanel.setCreateIssueActionListener(new CreateIssuePanel.CreateIssueActionListener() {
             @Override
             public void onCancelRequested() {
-                System.out.println("[MainFrame] Create Issue Cancel Requested");
                 contentCardLayout.show(contentAreaPanel, ISSUES_CARD);
                 navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
-            }
 
-            @Override
-            public void onCancelFromEditRequested(int issueId) {
-                issueDetailPanel.loadIssue(issueId);
-                contentCardLayout.show(contentAreaPanel, ISSUE_DETAIL_CARD);
-                navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
+                issuesPanel.onActivate();
             }
 
             @Override
             public void onSaveRequested(String project, String title, String description, Priority priority) {
-                System.out.println("[MainFrame] Create Issue Save Requested");
-                System.out.println("[MainFrame] Selected Project: " + project);
-                System.out.println("[MainFrame] Entered Title: " + title);
-                System.out.println("[MainFrame] Entered Description: " + description);
-                System.out.println("[MainFrame] Selected Priority: " + priority);
-                // TODO: validation 및 DB 저장 로직 호출
+                handleCreateIssue(project, title, description, priority, issuesPanel, createIssuePanel, statisticsPanel);
             }
         });
 
         issueDetailPanel.setIssueDetailActionListener(new IssueDetailPanel.IssueDetailActionListener() {
             @Override
             public void onBackRequested() {
-                System.out.println("[MainFrame] Issue Detail Back Requested");
                 contentCardLayout.show(contentAreaPanel, ISSUES_CARD);
                 navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
+
+                issuesPanel.onActivate();
+
+                contentAreaPanel.revalidate();
+                contentAreaPanel.repaint();
             }
 
             @Override
-            public void onIssueEditRequested(int issueId) {
-                System.out.println("[MainFrame] Issue Detail Edit Requested");
-                System.out.println("[MainFrame] Selected Issue: " + issueId);
-                createIssuePanel.loadIssue(issueId);
-                contentCardLayout.show(contentAreaPanel, CREATE_ISSUE_CARD);
-                navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
-            }
-
-            @Override
-            public void onIssueDeleteRequested(int issueId) {
-                System.out.println("[MainFrame] Issue Detail Delete Requested");
-                System.out.println("[MainFrame] Selected Issue: " + issueId);
-                // TODO: 정말 삭제하겠습니까? 팝업 띄우기(handleLogout 참고)
-                contentCardLayout.show(contentAreaPanel, ISSUES_CARD);
-                // TODO: 이슈 제거 로직 호출
-                navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
-            }
-
-            @Override
-            public void onStatusChangeRequested(int issueId, IssueStatus status, String comment) {
-                System.out.println("[MainFrame] Issue Detail Change Requested");
-                System.out.println("[MainFrame] Selected Issue: " + issueId);
-                // TODO: 코멘트 등록 로직 호출
+            public void onStatusChangeRequested(int issueId, IssueStatus status, Long assigneeId, String comment) {
+                handleStatusChange(issueId, status, assigneeId, comment, issuesPanel, issueDetailPanel, statisticsPanel);
             }
         });
 
-        contentAreaPanel.add(new ProjectsPanel(), PROJECTS_CARD);
+        contentAreaPanel.add(projectsPanel, PROJECTS_CARD);
         contentAreaPanel.add(issuesPanel, ISSUES_CARD);
         contentAreaPanel.add(createIssuePanel, CREATE_ISSUE_CARD);
         contentAreaPanel.add(issueDetailPanel, ISSUE_DETAIL_CARD);
-        contentAreaPanel.add(createTempPanel("Statistics"), STATISTICS_CARD);
+        contentAreaPanel.add(statisticsPanel, STATISTICS_CARD);
+        contentAreaPanel.add(usersPanel, USERS_CARD);
 
+        panel.add(titleBarPanel, BorderLayout.NORTH);
+        panel.add(navigationPanel, BorderLayout.WEST);
         panel.add(contentAreaPanel, BorderLayout.CENTER);
 
         return panel;
+    }
+
+    private void handleCreateIssue(
+            String projectName,
+            String title,
+            String description,
+            Priority priority,
+            IssuesPanel issuesPanel,
+            CreateIssuePanel createIssuePanel,
+            StatisticsPanel statisticsPanel
+    ) {
+        try {
+            if (currentUser == null) {
+                throw new IllegalStateException("current user is not set");
+            }
+
+            validateIssueForm(projectName, title, description);
+
+            Project project = findProjectByName(projectName);
+
+            Issue created = services.getIssueService().createIssue(
+                    project.getId(),
+                    title.trim(),
+                    description.trim(),
+                    currentUser.getId(),
+                    priority
+            );
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "이슈가 등록되었습니다. Issue #" + created.getId(),
+                    "Issue Created",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            createIssuePanel.clear();
+            issuesPanel.refreshIssues();
+            statisticsPanel.refreshStatistics();
+
+            contentCardLayout.show(contentAreaPanel, ISSUES_CARD);
+            navigationPanel.selectButton(NavigationPanel.NavigationListener.ISSUES);
+        } catch (Exception e) {
+            showError("Issue Create Error", e);
+        }
+    }
+
+    private void handleStatusChange(
+            int issueId,
+            IssueStatus status,
+            Long assigneeId,
+            String comment,
+            IssuesPanel issuesPanel,
+            IssueDetailPanel issueDetailPanel,
+            StatisticsPanel statisticsPanel
+    ) {
+        try {
+            if (currentUser == null) {
+                throw new IllegalStateException("current user is not set");
+            }
+
+            if (status == null) {
+                throw new IllegalArgumentException("status must be selected");
+            }
+
+            if (status == IssueStatus.ASSIGNED && assigneeId == null) {
+                throw new IllegalArgumentException("assigneeId must be selected");
+            }
+
+            Long id = (long) issueId;
+            Issue updatedIssue;
+
+            switch (status) {
+                case ASSIGNED -> updatedIssue = services.getIssueService().assignIssue(
+                        id,
+                        currentUser.getId(),
+                        assigneeId,
+                        comment
+                );
+                case FIXED -> updatedIssue = services.getIssueService().markFixed(
+                        id,
+                        currentUser.getId(),
+                        comment
+                );
+                case RESOLVED -> updatedIssue = services.getIssueService().resolveIssue(
+                        id,
+                        currentUser.getId(),
+                        comment
+                );
+                case CLOSED -> updatedIssue = services.getIssueService().closeIssue(
+                        id,
+                        currentUser.getId(),
+                        comment
+                );
+                case REOPENED -> updatedIssue = services.getIssueService().reopenIssue(
+                        id,
+                        currentUser.getId(),
+                        comment
+                );
+                case NEW -> throw new IllegalArgumentException("cannot change issue status back to NEW");
+                default -> throw new IllegalArgumentException("unsupported status: " + status);
+            }
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "상태가 변경되었습니다: " + updatedIssue.getStatus(),
+                    "Status Updated",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            issueDetailPanel.setAssignable(currentUser != null
+                    && (currentUser.hasRole(Role.PL) || currentUser.hasRole(Role.ADMIN)));
+            issueDetailPanel.loadIssue(issueId);
+            issuesPanel.refreshIssues();
+            statisticsPanel.refreshStatistics();
+        } catch (Exception e) {
+            showError("Status Change Error", e);
+        }
+    }
+
+    private Long selectAssigneeId(Long issueId) {
+        List<AssigneeRecommendation> recommendations =
+                services.getRecommendationService().recommendAssignees(issueId, 1);
+
+        if (!recommendations.isEmpty()) {
+            return recommendations.get(0).getAssignee().getId();
+        }
+
+        return services.getUserService().getAllUsers().stream()
+                .filter(user -> user.hasRole(Role.DEV))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("no DEV user exists"))
+                .getId();
+    }
+
+    private void validateIssueForm(String projectName, String title, String description) {
+        if (projectName == null || projectName.isBlank()) {
+            throw new IllegalArgumentException("project must be selected");
+        }
+
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("title must not be blank");
+        }
+
+        if (description == null || description.isBlank()) {
+            throw new IllegalArgumentException("description must not be blank");
+        }
+    }
+
+    private Project findProjectByName(String projectName) {
+        return services.getProjectService().getAllProjects().stream()
+                .filter(project -> project.getName().equals(projectName))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("project not found: " + projectName));
     }
 
     private void handleLogout() {
@@ -201,25 +402,14 @@ public class MainFrame extends JFrame {
         );
 
         if (result == JOptionPane.YES_OPTION) {
-            showLoginPanel();
             currentUser = null;
+            showLoginPanel();
         }
-    }
-
-    // Helper, 추후 삭제
-    private JPanel createTempPanel(String label) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.LIGHT_GRAY);
-
-        JLabel titleLabel = new JLabel(label + " - Coming Soon", SwingConstants.CENTER);
-        titleLabel.setFont(UIConstants.TITLE_FONT);
-        panel.add(titleLabel, BorderLayout.CENTER);
-
-        return panel;
     }
 
     private void clearAllContentPanels() {
         Component[] components = contentAreaPanel.getComponents();
+
         for (Component component : components) {
             if (component instanceof BasePanel) {
                 ((BasePanel) component).clear();
@@ -227,5 +417,16 @@ public class MainFrame extends JFrame {
         }
     }
 
+    private String currentUsername() {
+        return currentUser == null ? "" : currentUser.getUsername();
+    }
 
+    private void showError(String title, Exception e) {
+        JOptionPane.showMessageDialog(
+                this,
+                e.getMessage(),
+                title,
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
 }

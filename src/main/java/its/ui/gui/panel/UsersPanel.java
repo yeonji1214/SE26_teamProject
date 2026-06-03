@@ -1,7 +1,9 @@
 package its.ui.gui.panel;
 
-import its.domain.project.Project;
-import its.service.ProjectService;
+import its.domain.user.Role;
+import its.domain.user.User;
+import its.service.UserService;
+import its.ui.gui.common.PlaceholderPasswordField;
 import its.ui.gui.common.PlaceholderTextField;
 import its.ui.gui.common.UIConstants;
 
@@ -11,27 +13,26 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
 
-public class ProjectsPanel extends BasePanel {
-    private JTable projectTable;
+public class UsersPanel extends BasePanel {
+    private JTable userTable;
     private DefaultTableModel tableModel;
-    private ProjectService projectService;
+    private UserService userService;
 
     private static final String[] COLUMN_NAMES = {
-            "Project Name",
-            "Description",
-            "Created",
-            "Status"
+            "User Name",
+            "Role"
     };
 
     private boolean isAdmin = false;
     private JPanel formPanel;
     private PlaceholderTextField nameField;
-    private PlaceholderTextField descriptionField;
+    private PlaceholderPasswordField passwordField;
+    private JComboBox<Role> roleComboBox;
     private JButton addButton;
 
-    public void setProjectService(ProjectService projectService) {
-        this.projectService = projectService;
-        refreshProjects();
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+        refreshUsers();
     }
 
     public void setAdmin(boolean isAdmin) {
@@ -42,8 +43,9 @@ public class ProjectsPanel extends BasePanel {
     @Override
     protected void initComponents() {
         formPanel = new JPanel();
-        nameField = new PlaceholderTextField("프로젝트 이름");
-        descriptionField = new PlaceholderTextField("간단한 프로젝트 설명 (선택사항)");
+        nameField = new PlaceholderTextField("id");
+        passwordField = new PlaceholderPasswordField("pw");
+        roleComboBox = new JComboBox<>(Role.values());
         addButton = createStyledButton("추가", UIConstants.ButtonType.PRIMARY);
 
         JPanel titlePanel = createTitlePanel();
@@ -52,8 +54,7 @@ public class ProjectsPanel extends BasePanel {
         JScrollPane tableScrollPane = createTablePanel();
         add(tableScrollPane, BorderLayout.CENTER);
 
-        formPanel = createProjectFormPanel();
-        formPanel.setPreferredSize(new Dimension(700, formPanel.getPreferredSize().height));
+        formPanel = createUserFormPanel();
 
         JPanel southWrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         southWrapper.setOpaque(false);
@@ -66,12 +67,12 @@ public class ProjectsPanel extends BasePanel {
         add(Box.createHorizontalStrut(30), BorderLayout.WEST);
         add(Box.createHorizontalStrut(30), BorderLayout.EAST);
 
-        refreshProjects();
+        refreshUsers();
     }
 
     @Override
     protected void setupListeners() {
-        addButton.addActionListener(e -> handleCreateProject());
+        addButton.addActionListener(e -> handleCreateUser());
     }
 
     private JPanel createTitlePanel() {
@@ -79,11 +80,11 @@ public class ProjectsPanel extends BasePanel {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setOpaque(false);
 
-        JLabel title = new JLabel("Projects");
+        JLabel title = new JLabel("Users");
         title.setFont(UIConstants.TITLE_FONT);
         title.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel subtitle = new JLabel("백엔드 ProjectService에서 불러온 프로젝트 목록입니다.");
+        JLabel subtitle = new JLabel("유저 목록입니다.");
         subtitle.setFont(UIConstants.LABEL_FONT);
         subtitle.setForeground(Color.GRAY);
         subtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -104,16 +105,16 @@ public class ProjectsPanel extends BasePanel {
             }
         };
 
-        projectTable = new JTable(tableModel);
+        userTable = new JTable(tableModel);
         setupTableStyle();
 
-        JScrollPane scrollPane = new JScrollPane(projectTable);
+        JScrollPane scrollPane = new JScrollPane(userTable);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
         return scrollPane;
     }
 
-    private JPanel createProjectFormPanel() {
+    private JPanel createUserFormPanel() {
         formPanel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
 
@@ -122,21 +123,27 @@ public class ProjectsPanel extends BasePanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 0, 5, 0);
 
-        JLabel title = new JLabel("프로젝트 추가");
+        JLabel title = new JLabel("유저 추가");
         title.setFont(UIConstants.SUBTITLE_FONT);
         gbc.gridy = 0;
         formPanel.add(title, gbc);
 
-        JLabel nameLabel = new JLabel("이름");
+        JLabel nameLabel = new JLabel("ID");
         nameLabel.setFont(UIConstants.LABEL_FONT);
         gbc.gridy = 1;
         gbc.insets = new Insets(5, 0, 5, 10);
         formPanel.add(nameLabel, gbc);
 
-        JLabel descriptionLabel = new JLabel("설명");
-        descriptionLabel.setFont(UIConstants.LABEL_FONT);
+        JLabel passwordLabel = new JLabel("비밀번호");
+        passwordLabel.setFont(UIConstants.LABEL_FONT);
         gbc.gridx = 1;
-        formPanel.add(descriptionLabel, gbc);
+        formPanel.add(passwordLabel, gbc);
+
+        JLabel roleLabel = new JLabel("역할");
+        roleLabel.setFont(UIConstants.LABEL_FONT);
+        gbc.insets = new Insets(5, 3, 5, 0);
+        gbc.gridx = 2;
+        formPanel.add(roleLabel, gbc);
 
         nameField.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(UIConstants.CARD_COLOR),
@@ -144,18 +151,19 @@ public class ProjectsPanel extends BasePanel {
         ));
         gbc.gridy = 2;
         gbc.gridx = 0;
-        gbc.weightx = 0.3;
         gbc.insets = new Insets(0, 0, 5, 10);
         formPanel.add(nameField, gbc);
 
-        descriptionField.setBorder(BorderFactory.createCompoundBorder(
+        passwordField.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(UIConstants.CARD_COLOR),
                 BorderFactory.createEmptyBorder(5,5,5,5)
         ));
         gbc.gridx = 1;
-        gbc.weightx = 0.7;
+        formPanel.add(passwordField, gbc);
+
+        gbc.gridx = 2;
         gbc.insets = new Insets(0, 0, 5, 0);
-        formPanel.add(descriptionField, gbc);
+        formPanel.add(roleComboBox, gbc);
 
         gbc.gridy = 3;
         gbc.gridx = 0;
@@ -170,7 +178,7 @@ public class ProjectsPanel extends BasePanel {
     }
 
     private void setupTableStyle() {
-        JTableHeader header = projectTable.getTableHeader();
+        JTableHeader header = userTable.getTableHeader();
 
         header.setFont(UIConstants.HEADER_FONT);
         header.setBackground(new Color(200, 200, 200));
@@ -179,18 +187,16 @@ public class ProjectsPanel extends BasePanel {
         header.setReorderingAllowed(false);
         header.setResizingAllowed(false);
 
-        projectTable.setRowHeight(30);
-        projectTable.setFont(UIConstants.LABEL_FONT);
-        projectTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        projectTable.setGridColor(new Color(230, 230, 230));
-        projectTable.setSelectionBackground(new Color(180, 180, 180));
+        userTable.setRowHeight(30);
+        userTable.setFont(UIConstants.LABEL_FONT);
+        userTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        userTable.setGridColor(new Color(230, 230, 230));
+        userTable.setSelectionBackground(new Color(180, 180, 180));
 
-        projectTable.getColumnModel().getColumn(0).setPreferredWidth(200);
-        projectTable.getColumnModel().getColumn(1).setPreferredWidth(240);
-        projectTable.getColumnModel().getColumn(2).setPreferredWidth(120);
-        projectTable.getColumnModel().getColumn(3).setPreferredWidth(80);
+        userTable.getColumnModel().getColumn(0).setPreferredWidth(200);
+        userTable.getColumnModel().getColumn(1).setPreferredWidth(240);
 
-        projectTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+        userTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(
                     JTable table,
@@ -222,48 +228,51 @@ public class ProjectsPanel extends BasePanel {
         });
     }
 
-    public void refreshProjects() {
+    public void refreshUsers() {
         if (tableModel == null) {
             return;
         }
 
         tableModel.setRowCount(0);
 
-        if (projectService == null) {
+        if (userService == null) {
             return;
         }
 
-        for (Project project : projectService.getAllProjects()) {
+        for (User user : userService.getAllUsers()) {
             tableModel.addRow(new Object[]{
-                    project.getName(),
-                    project.getDescription(),
-                    project.getCreatedAt().format(UIConstants.DATE_FORMATTER),
-                    "Active"
+                    user.getUsername(),
+                    user.getRole()
             });
         }
     }
 
-    private void handleCreateProject() {
+    private void handleCreateUser() {
         if (!isAdmin) {
-            JOptionPane.showMessageDialog(this, "Only admin can create projects", "권한 없음", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Only admin can create users", "권한 없음", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         String name = nameField.getText();
-        String description = descriptionField.getText();
+        String password = new String(passwordField.getPassword());
+        Role role = (Role) roleComboBox.getSelectedItem();
 
         if (name.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Project name must be entered", "입력 오류", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "User name must be entered", "입력 오류", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (password.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Password must be entered", "입력 오류", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
-            projectService.createProject(name.trim(), description.trim());
+            userService.createUser(name.trim(), password.trim(), role);
             nameField.setText("");
-            descriptionField.setText("");
-            refreshProjects();
+            passwordField.setText("");
+            refreshUsers();
         } catch (IllegalArgumentException ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Project create Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "User create Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -275,12 +284,12 @@ public class ProjectsPanel extends BasePanel {
 
     @Override
     public void onActivate() {
-        refreshProjects();
-        projectTable.clearSelection();
+        refreshUsers();
+        userTable.clearSelection();
     }
 
     @Override
     public void clear() {
-        projectTable.clearSelection();
+        userTable.clearSelection();
     }
 }
