@@ -77,6 +77,17 @@ function Sidebar() {
           Statistics
         </NavLink>
 
+        {currentUser?.role === "ADMIN" && (
+          <NavLink
+            to="/users"
+            className={({ isActive }) =>
+              isActive ? "sidebar-link active" : "sidebar-link"
+            }
+          >
+            Users
+          </NavLink>
+        )}
+
         <NavLink
           to="/login"
           className={({ isActive }) =>

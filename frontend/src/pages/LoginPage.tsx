@@ -1,37 +1,42 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUsers, loginAsUser } from "../api/userApi";
-import type { User } from "../types/user";
+import { loginWithPassword } from "../api/userApi";
 import { saveCurrentUser } from "../utils/authStorage";
 
 function LoginPage() {
   const navigate = useNavigate();
 
-  const [users, setUsers] = useState<User[]>([]);
-  const [selectedUserId, setSelectedUserId] = useState<number>(1);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    getUsers().then((data) => {
-      setUsers(data);
-
-      if (data.length > 0) {
-        setSelectedUserId(data[0].id);
-        setSelectedUser(data[0]);
-      }
-    });
-  }, []);
-
-  useEffect(() => {
-    const user = users.find((item) => item.id === selectedUserId) ?? null;
-    setSelectedUser(user);
-  }, [selectedUserId, users]);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleLogin = async () => {
-    const user = await loginAsUser(selectedUserId);
+    if (!username.trim() || !password.trim()) {
+      setErrorMessage("아이디와 비밀번호를 모두 입력하세요.");
+      return;
+    }
 
-    saveCurrentUser(user);
-    navigate("/dashboard");
+    setIsLoggingIn(true);
+    setErrorMessage("");
+
+    try {
+      const user = await loginWithPassword({
+        username: username.trim(),
+        password,
+      });
+
+      saveCurrentUser(user);
+      navigate("/dashboard");
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "로그인에 실패했습니다."
+      );
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   return (
@@ -39,40 +44,48 @@ function LoginPage() {
       <div className="login-card">
         <div className="login-header">
           <h2>로그인</h2>
-          <p>데모용 계정을 선택해서 로그인합니다.</p>
+          <p>아이디와 비밀번호를 입력해 로그인합니다.</p>
         </div>
 
         <label className="login-field">
-          <span>계정</span>
-          <select
-            value={selectedUserId}
-            onChange={(event) => setSelectedUserId(Number(event.target.value))}
-          >
-            {users.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.displayName} / {user.role}
-              </option>
-            ))}
-          </select>
+          <span>아이디</span>
+          <input
+            type="text"
+            value={username}
+            autoComplete="username"
+            onChange={(event) => setUsername(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                handleLogin();
+              }
+            }}
+          />
         </label>
 
-        {selectedUser && (
-          <div className="login-user-preview">
-            <div className="login-avatar">
-              {selectedUser.displayName.charAt(0)}
-            </div>
+        <label className="login-field">
+          <span>비밀번호</span>
+          <input
+            type="password"
+            value={password}
+            autoComplete="current-password"
+            onChange={(event) => setPassword(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                handleLogin();
+              }
+            }}
+          />
+        </label>
 
-            <div>
-              <strong>{selectedUser.displayName}</strong>
-              <p>
-                @{selectedUser.username} · {selectedUser.role}
-              </p>
-            </div>
-          </div>
-        )}
+        {errorMessage && <p className="error-message">{errorMessage}</p>}
 
-        <button type="button" className="primary-button" onClick={handleLogin}>
-          로그인
+        <button
+          type="button"
+          className="primary-button"
+          onClick={handleLogin}
+          disabled={isLoggingIn}
+        >
+          {isLoggingIn ? "로그인 중..." : "로그인"}
         </button>
       </div>
     </section>

@@ -20,6 +20,17 @@ public class UserService {
         return userRepository.save(new User(null, username, password, role));
     }
 
+    public User login(String username, String password) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("invalid username or password"));
+
+        if (!user.getPassword().equals(password)) {
+            throw new IllegalArgumentException("invalid username or password");
+        }
+
+        return user;
+    }
+
     public User getUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("user not found: " + userId));

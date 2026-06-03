@@ -7,6 +7,7 @@ import IssueCreatePage from "../pages/IssueCreatePage";
 import IssueDetailPage from "../pages/IssueDetailPage";
 import StatisticsPage from "../pages/StatisticsPage";
 import DashboardPage from "../pages/DashboardPage";
+import UserManagementPage from "../pages/UserManagementPage";
 import ProtectedRoute from "./ProtectedRoute";
 
 const root = createBrowserRouter([
@@ -52,6 +53,10 @@ const root = createBrowserRouter([
           {
             path: "statistics",
             element: <StatisticsPage />,
+          },
+          {
+            path: "/users",
+            element: <UserManagementPage />,
           },
         ],
       },

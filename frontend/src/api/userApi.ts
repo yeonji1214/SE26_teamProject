@@ -1,5 +1,5 @@
 import { apiRequest } from "./apiClient";
-import type { LoginRequest, User } from "../types/user";
+import type { LoginRequest, PasswordLoginRequest, User, UserCreateRequest } from "../types/user";
 
 export async function getUsers(): Promise<User[]> {
   return apiRequest<User[]>("/api/users");
@@ -9,10 +9,26 @@ export async function getUserById(userId: number): Promise<User> {
   return apiRequest<User>(`/api/users/${userId}`);
 }
 
+export async function createUser(request: UserCreateRequest): Promise<User> {
+  return apiRequest<User>("/api/users", {
+    method: "POST",
+    body: request,
+  });
+}
+
 export async function loginAsUser(userId: number): Promise<User> {
   const request: LoginRequest = { userId };
 
   return apiRequest<User>("/api/login", {
+    method: "POST",
+    body: request,
+  });
+}
+
+export async function loginWithPassword(
+  request: PasswordLoginRequest
+): Promise<User> {
+  return apiRequest<User>("/api/login/password", {
     method: "POST",
     body: request,
   });

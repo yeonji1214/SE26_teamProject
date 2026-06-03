@@ -5,6 +5,7 @@ import its.api.dto.ApiDtoMapper;
 import its.api.ApiHandlerSupport;
 import its.api.dto.CreateUserRequest;
 import its.api.dto.LoginRequest;
+import its.api.dto.PasswordLoginRequest;
 import its.api.dto.UserResponse;
 import its.domain.user.Role;
 import its.domain.user.User;
@@ -29,6 +30,11 @@ public class UserApiHandler extends ApiHandlerSupport {
         try {
             List<String> segments = pathSegments(exchange);
 
+            if (isPasswordLoginPath(segments)) {
+                handlePasswordLogin(exchange);
+                return;
+            }
+            
             if (isLoginPath(segments)) {
                 handleLogin(exchange);
                 return;
@@ -62,6 +68,13 @@ public class UserApiHandler extends ApiHandlerSupport {
         }
     }
 
+    private boolean isPasswordLoginPath(List<String> segments) {
+        return segments.size() == 3
+                && "api".equals(segments.get(0))
+                && "login".equals(segments.get(1))
+                && "password".equals(segments.get(2));
+    }
+
     private boolean isLoginPath(List<String> segments) {
         return segments.size() == 2
                 && "api".equals(segments.get(0))
@@ -82,6 +95,21 @@ public class UserApiHandler extends ApiHandlerSupport {
 
         LoginRequest request = readRequest(exchange, LoginRequest.class);
         User user = services.getUserService().getUser(request.getUserId());
+
+        sendJson(exchange, 200, ApiDtoMapper.toUserResponse(user));
+    }
+
+    private void handlePasswordLogin(HttpExchange exchange) throws IOException {
+        if (!"POST".equals(method(exchange))) {
+            sendMethodNotAllowed(exchange);
+            return;
+        }
+
+        PasswordLoginRequest request = readRequest(exchange, PasswordLoginRequest.class);
+        User user = services.getUserService().login(
+                request.getUsername(),
+                request.getPassword()
+        );
 
         sendJson(exchange, 200, ApiDtoMapper.toUserResponse(user));
     }
