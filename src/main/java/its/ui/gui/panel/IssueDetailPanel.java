@@ -495,7 +495,9 @@ public class IssueDetailPanel extends BasePanel {
                 }
             }
         }
-        assigneeComboBox.setSelectedItem(issue.getAssignee());
+
+        selectAssigneeInCombo(issue.getAssignee());
+
         updateAssigneeComboState();
 
         if (issue.getAssignee() == null && this.assignable) {
@@ -566,15 +568,20 @@ public class IssueDetailPanel extends BasePanel {
 
             recommendationPanel.setVisible(true);
 
-            for (int i = 0; i < assigneeComboBox.getItemCount(); i++) {
-                User comboUser = assigneeComboBox.getItemAt(i);
-                if (comboUser != null && comboUser.getId().equals(recommendedUser.getId())) {
-                    assigneeComboBox.setSelectedIndex(i);
-                    break;
-                }
-            }
+            selectAssigneeInCombo(recommendedUser);
         } else {
             recommendationPanel.setVisible(false);
+        }
+    }
+
+    private void selectAssigneeInCombo(User target) {
+        if (target == null) return;
+        for (int i = 0; i < assigneeComboBox.getItemCount(); i++) {
+            User comboUser = assigneeComboBox.getItemAt(i);
+            if (comboUser != null && comboUser.getId().equals(target.getId())) {
+                assigneeComboBox.setSelectedIndex(i);
+                return;
+            }
         }
     }
 
