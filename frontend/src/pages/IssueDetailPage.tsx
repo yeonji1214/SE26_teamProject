@@ -92,6 +92,28 @@ function IssueDetailPage() {
   const canAssignIssue =
     currentUser?.role === "ADMIN" || currentUser?.role === "PL";
 
+  const isIssueUnassigned = useMemo(() => {
+    if (!issue) {
+      return false;
+    }
+
+    const issueWithAssignee = issue as Issue & {
+      assignee?: User | string | null;
+      assigneeId?: number | null;
+    };
+
+    const hasAssignee =
+      issueWithAssignee.assignee !== null &&
+      issueWithAssignee.assignee !== undefined &&
+      String(issueWithAssignee.assignee).trim() !== "";
+
+    const hasAssigneeId =
+      issueWithAssignee.assigneeId !== null &&
+      issueWithAssignee.assigneeId !== undefined;
+
+    return !hasAssignee && !hasAssigneeId;
+  }, [issue]);
+
   const allowedStatuses = useMemo(() => {
     if (!issue) {
       return [];
@@ -183,11 +205,18 @@ function IssueDetailPage() {
   };
 
   const openAssignModal = () => {
+    const currentAssigneeId =
+      (issue as Issue & { assigneeId?: number | null })?.assigneeId?.toString() ??
+      "";
+
     const firstRecommendedAssigneeId =
       recommendations[0]?.assignee.id.toString() ?? "";
+
     const firstDevId = assigneeCandidates[0]?.id.toString() ?? "";
 
-    setSelectedAssigneeId(firstRecommendedAssigneeId || firstDevId);
+    setSelectedAssigneeId(
+      currentAssigneeId || firstRecommendedAssigneeId || firstDevId
+    );
     setAssignComment("");
     setModalType("assign");
   };
@@ -395,7 +424,7 @@ function IssueDetailPage() {
             )}
           </div>
 
-          {canAssignIssue && (
+          {canAssignIssue && isIssueUnassigned && (
             <div className="recommendation-preview">
               <h4>추천 담당자</h4>
 
@@ -535,6 +564,7 @@ function IssueDetailPage() {
           assigneeCandidates={assigneeCandidates}
           selectedAssigneeId={selectedAssigneeId}
           assignComment={assignComment}
+          showRecommendations={isIssueUnassigned}
           onSelectAssignee={setSelectedAssigneeId}
           onChangeComment={setAssignComment}
           onClose={closeModal}
