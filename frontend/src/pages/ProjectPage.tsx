@@ -5,6 +5,7 @@ import { getIssues } from "../api/issueApi";
 import ProjectForm from "../components/ProjectForm";
 import ProjectTable, { type ProjectRow } from "../components/ProjectTable";
 import type { Project } from "../types/project";
+import { getCurrentUser } from "../utils/authStorage";
 
 function formatCreatedAt(createdAt?: string | null) {
   if (!createdAt) {
@@ -26,6 +27,9 @@ function formatCreatedAt(createdAt?: string | null) {
 
 function ProjectPage() {
   const navigate = useNavigate();
+
+  const currentUser = getCurrentUser();
+  const isAdmin = currentUser?.role === "ADMIN";
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -92,6 +96,11 @@ function ProjectPage() {
     name: string;
     description: string;
   }) => {
+    if (!isAdmin) {
+      alert("프로젝트 추가는 관리자만 가능합니다.");
+      return;
+    }
+
     try {
       const createdProject = await createProject(request);
 
@@ -133,7 +142,7 @@ function ProjectPage() {
         />
       )}
 
-      <ProjectForm onSubmit={handleCreateProject} />
+      {isAdmin && <ProjectForm onSubmit={handleCreateProject} />}``
     </section>
   );
 }
