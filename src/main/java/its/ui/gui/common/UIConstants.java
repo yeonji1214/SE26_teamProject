@@ -35,4 +35,5 @@ public class UIConstants {
 
     public static final DateTimeFormatter DATE_TIME_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy. M. d. a hh:mm:ss", Locale.KOREAN);
+    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 }

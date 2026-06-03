@@ -40,8 +40,6 @@ public class IssuesPanel extends BasePanel {
     private IssueService issueService;
     private ProjectService projectService;
 
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
     private static final String[] COLUMN_NAMES = {
             "ID", "제목", "상태", "우선순위", "리포터", "담당자", "등록일"
     };
@@ -368,7 +366,7 @@ public class IssuesPanel extends BasePanel {
 
     private void addIssue(Issue issue) {
         String assignee = issue.getAssignee() == null ? "-" : issue.getAssignee().getUsername();
-        String reportedDate = issue.getReportedDate().format(DATE_FORMATTER);
+        String reportedDate = issue.getReportedDate().format(UIConstants.DATE_FORMATTER);
 
         tableModel.addRow(new Object[]{
                 issue.getId().intValue(),

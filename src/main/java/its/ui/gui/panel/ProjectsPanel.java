@@ -237,7 +237,7 @@ public class ProjectsPanel extends BasePanel {
             tableModel.addRow(new Object[]{
                     project.getName(),
                     project.getDescription(),
-                    "-",
+                    project.getCreatedAt().format(UIConstants.DATE_FORMATTER),
                     "Active"
             });
         }
