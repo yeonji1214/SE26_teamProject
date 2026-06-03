@@ -6,11 +6,11 @@ import java.util.Locale;
 
 public class UIConstants {
     // Font constants
-    public static final Font TITLE_FONT = new Font("Arial", Font.BOLD, 20);
-    public static final Font SUBTITLE_FONT = new Font("Arial", Font.BOLD, 16);
-    public static final Font HEADER_FONT = new Font("Arial", Font.BOLD, 14);
-    public static final Font BUTTON_FONT = new Font("Arial", Font.PLAIN, 14);
-    public static final Font LABEL_FONT = new Font("Arial", Font.PLAIN, 12);
+    public static final Font TITLE_FONT = new Font(Font.SANS_SERIF, Font.BOLD, 20);
+    public static final Font SUBTITLE_FONT = new Font(Font.SANS_SERIF, Font.BOLD, 16);
+    public static final Font HEADER_FONT = new Font(Font.SANS_SERIF, Font.BOLD, 14);
+    public static final Font BUTTON_FONT = new Font(Font.SANS_SERIF, Font.PLAIN, 14);
+    public static final Font LABEL_FONT = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
 
     // Color constants
     public static final Color BACKGROUND_COLOR = new Color(240, 240, 240);

@@ -10,6 +10,10 @@ repositories {
     mavenCentral()
 }
 
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
 dependencies {
     implementation 'org.xerial:sqlite-jdbc:3.53.1.0'
 
