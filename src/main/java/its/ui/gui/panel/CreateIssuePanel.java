@@ -224,7 +224,7 @@ public class CreateIssuePanel extends BasePanel {
 
         titleTextField.setText("");
         descriptionTextArea.setText("");
-        priorityComboBox.setSelectedIndex(0);
+        priorityComboBox.setSelectedIndex(2);
     }
 
     @Override
