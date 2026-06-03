@@ -14,6 +14,7 @@ public class NavigationPanel extends JPanel {
     private JButton createIssueButton;
     private JButton statisticsButton;
     private JButton logoutButton;
+    private JButton usersButton;
 
     private NavigationListener listener;
 
@@ -28,6 +29,7 @@ public class NavigationPanel extends JPanel {
         issuesButton = createNavButton("Issues");
         createIssueButton = createNavButton("Create Issue");
         statisticsButton = createNavButton("Statistics");
+        usersButton = createNavButton("Users");
         logoutButton = createNavButton("Logout");
 
         setupButtonListeners();
@@ -36,6 +38,7 @@ public class NavigationPanel extends JPanel {
         add(issuesButton);
         add(createIssueButton);
         add(statisticsButton);
+        add(usersButton);
 
         add(Box.createVerticalGlue());
 
@@ -87,6 +90,7 @@ public class NavigationPanel extends JPanel {
         attachListener(issuesButton, NavigationListener.ISSUES);
         attachListener(createIssueButton, NavigationListener.CREATE_ISSUES);
         attachListener(statisticsButton, NavigationListener.STATISTICS);
+        attachListener(usersButton, NavigationListener.USERS);
         attachListener(logoutButton, NavigationListener.LOGOUT);
     }
 
@@ -111,6 +115,7 @@ public class NavigationPanel extends JPanel {
         String ISSUES = "ISSUES";
         String CREATE_ISSUES = "CREATE_ISSUE";
         String STATISTICS = "STATISTICS";
+        String USERS = "USERS";
         String LOGOUT = "LOGOUT";
     }
 
@@ -131,6 +136,7 @@ public class NavigationPanel extends JPanel {
             case NavigationListener.ISSUES -> selectButton(issuesButton);
             case NavigationListener.CREATE_ISSUES -> selectButton(createIssueButton);
             case NavigationListener.STATISTICS -> selectButton(statisticsButton);
+            case NavigationListener.USERS -> selectButton(usersButton);
         }
     }
 }
