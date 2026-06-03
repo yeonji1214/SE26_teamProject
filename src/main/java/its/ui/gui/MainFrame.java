@@ -10,15 +10,7 @@ import its.service.ApplicationServices;
 import its.service.AssigneeRecommendation;
 import its.service.DemoDataSeeder;
 import its.service.ServiceFactory;
-import its.ui.gui.panel.BasePanel;
-import its.ui.gui.panel.CreateIssuePanel;
-import its.ui.gui.panel.IssueDetailPanel;
-import its.ui.gui.panel.IssuesPanel;
-import its.ui.gui.panel.LoginPanel;
-import its.ui.gui.panel.NavigationPanel;
-import its.ui.gui.panel.ProjectsPanel;
-import its.ui.gui.panel.StatisticsPanel;
-import its.ui.gui.panel.TitleBarPanel;
+import its.ui.gui.panel.*;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -46,6 +38,7 @@ public class MainFrame extends JFrame {
     private User currentUser;
 
     private ProjectsPanel projectsPanel;
+    private UsersPanel usersPanel;
 
     private static final String LOGIN_CARD = "LOGIN";
     private static final String MAIN_CARD = "MAIN";
@@ -55,6 +48,7 @@ public class MainFrame extends JFrame {
     private static final String CREATE_ISSUE_CARD = "CREATE_ISSUE";
     private static final String ISSUE_DETAIL_CARD = "ISSUE_DETAIL";
     private static final String STATISTICS_CARD = "STATISTICS";
+    private static final String USERS_CARD = "USERS";
 
     public MainFrame() {
         this(createDefaultServices());
@@ -117,6 +111,10 @@ public class MainFrame extends JFrame {
             projectsPanel.setAdmin(currentUser != null && currentUser.hasRole(Role.ADMIN));
         }
 
+        if (usersPanel != null) {
+            usersPanel.setAdmin(currentUser != null && currentUser.hasRole(Role.ADMIN));
+        }
+
         if (contentCardLayout != null && contentAreaPanel != null && navigationPanel != null) {
             contentCardLayout.show(contentAreaPanel, PROJECTS_CARD);
             navigationPanel.selectButton(NavigationPanel.NavigationListener.PROJECTS);
@@ -156,6 +154,9 @@ public class MainFrame extends JFrame {
         StatisticsPanel statisticsPanel = new StatisticsPanel();
         statisticsPanel.setStatisticsService(services.getStatisticsService());
 
+        usersPanel = new UsersPanel();
+        usersPanel.setUserService(services.getUserService());
+
 
         navigationPanel.setNavigationListener(menuName -> {
             if (menuName.equals("LOGOUT")) {
@@ -169,6 +170,7 @@ public class MainFrame extends JFrame {
                 case ISSUES_CARD -> issuesPanel.onActivate();
                 case CREATE_ISSUE_CARD -> createIssuePanel.onActivate();
                 case STATISTICS_CARD -> statisticsPanel.onActivate();
+                case USERS_CARD -> usersPanel.onActivate();
             }
         });
 
@@ -229,6 +231,7 @@ public class MainFrame extends JFrame {
         contentAreaPanel.add(createIssuePanel, CREATE_ISSUE_CARD);
         contentAreaPanel.add(issueDetailPanel, ISSUE_DETAIL_CARD);
         contentAreaPanel.add(statisticsPanel, STATISTICS_CARD);
+        contentAreaPanel.add(usersPanel, USERS_CARD);
 
         panel.add(titleBarPanel, BorderLayout.NORTH);
         panel.add(navigationPanel, BorderLayout.WEST);
