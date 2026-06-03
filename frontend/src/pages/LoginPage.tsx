@@ -44,7 +44,6 @@ function LoginPage() {
       <div className="login-card">
         <div className="login-header">
           <h2>로그인</h2>
-          <p>아이디와 비밀번호를 입력해 로그인합니다.</p>
         </div>
 
         <label className="login-field">

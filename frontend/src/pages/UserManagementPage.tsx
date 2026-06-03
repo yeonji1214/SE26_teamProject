@@ -85,9 +85,6 @@ function UserManagementPage() {
         <div>
           <p className="eyebrow">Account Management</p>
           <h2>Users</h2>
-          <p>
-            사용자 계정을 조회하고 ADMIN 계정으로 새 사용자를 추가합니다.
-          </p>
         </div>
 
         <div className="users-summary-card">
