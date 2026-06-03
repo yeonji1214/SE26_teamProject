@@ -8,6 +8,7 @@ interface AssignIssueModalProps {
   assigneeCandidates: User[];
   selectedAssigneeId: string;
   assignComment: string;
+  showRecommendations: boolean;
   onSelectAssignee: (assigneeId: string) => void;
   onChangeComment: (comment: string) => void;
   onClose: () => void;
@@ -19,17 +20,22 @@ function AssignIssueModal({
   assigneeCandidates,
   selectedAssigneeId,
   assignComment,
+  showRecommendations,
   onSelectAssignee,
   onChangeComment,
   onClose,
   onSubmit,
 }: AssignIssueModalProps) {
   const selectedRecommendation = useMemo(() => {
+    if (!showRecommendations) {
+      return undefined;
+    }
+
     return recommendations.find(
       (recommendation) =>
         recommendation.assignee.id.toString() === selectedAssigneeId
     );
-  }, [recommendations, selectedAssigneeId]);
+  }, [recommendations, selectedAssigneeId, showRecommendations]);
 
   const selectedAssignee = useMemo(() => {
     return assigneeCandidates.find(
@@ -40,71 +46,73 @@ function AssignIssueModal({
   return (
     <Modal title="담당자 지정" onClose={onClose}>
       <div className="modal-body">
-        <div className="assign-recommendation-box">
-          <h4>추천 담당자</h4>
+        {showRecommendations && (
+          <div className="assign-recommendation-box">
+            <h4>추천 담당자</h4>
 
-          {recommendations.length > 0 ? (
-            <ul>
-              {recommendations.map((recommendation) => {
-                const isSelected =
-                  recommendation.assignee.id.toString() === selectedAssigneeId;
+            {recommendations.length > 0 ? (
+              <ul>
+                {recommendations.map((recommendation) => {
+                  const isSelected =
+                    recommendation.assignee.id.toString() === selectedAssigneeId;
 
-                return (
-                  <li key={recommendation.assignee.id}>
-                    <button
-                      type="button"
-                      className={
-                        isSelected
-                          ? "recommendation-button recommendation-button-selected"
-                          : "recommendation-button"
-                      }
-                      onClick={() =>
-                        onSelectAssignee(recommendation.assignee.id.toString())
-                      }
-                    >
-                      <div className="recommendation-button-header">
-                        <div>
-                          <span className="recommendation-badge">추천</span>
-                          <strong>{recommendation.assignee.username}</strong>
+                  return (
+                    <li key={recommendation.assignee.id}>
+                      <button
+                        type="button"
+                        className={
+                          isSelected
+                            ? "recommendation-button recommendation-button-selected"
+                            : "recommendation-button"
+                        }
+                        onClick={() =>
+                          onSelectAssignee(recommendation.assignee.id.toString())
+                        }
+                      >
+                        <div className="recommendation-button-header">
+                          <div>
+                            <span className="recommendation-badge">추천</span>
+                            <strong>{recommendation.assignee.username}</strong>
+                          </div>
+
+                          <span>score: {recommendation.score.toFixed(1)}</span>
                         </div>
 
-                        <span>score: {recommendation.score.toFixed(1)}</span>
-                      </div>
+                        <div className="recommendation-button-detail">
+                          <p>
+                            <strong>근거 이슈:</strong>{" "}
+                            {recommendation.evidenceIssueTitles.length > 0
+                              ? recommendation.evidenceIssueTitles.join(", ")
+                              : "없음"}
+                          </p>
 
-                      <div className="recommendation-button-detail">
-                        <p>
-                          <strong>근거 이슈:</strong>{" "}
-                          {recommendation.evidenceIssueTitles.length > 0
-                            ? recommendation.evidenceIssueTitles.join(", ")
-                            : "없음"}
-                        </p>
+                          <p>
+                            <strong>매칭 키워드:</strong>{" "}
+                            {recommendation.matchedTerms.length > 0
+                              ? recommendation.matchedTerms.join(", ")
+                              : "없음"}
+                          </p>
 
-                        <p>
-                          <strong>매칭 키워드:</strong>{" "}
-                          {recommendation.matchedTerms.length > 0
-                            ? recommendation.matchedTerms.join(", ")
-                            : "없음"}
-                        </p>
+                          <p>
+                            <strong>매칭된 해결 이슈 수:</strong>{" "}
+                            {recommendation.matchedIssueCount}
+                          </p>
 
-                        <p>
-                          <strong>매칭된 해결 이슈 수:</strong>{" "}
-                          {recommendation.matchedIssueCount}
-                        </p>
-
-                        <p>
-                          <strong>현재 담당 중인 미해결 이슈:</strong>{" "}
-                          {recommendation.currentOpenAssignedIssueCount}
-                        </p>
-                      </div>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p>추천 가능한 담당자가 없습니다.</p>
-          )}
-        </div>
+                          <p>
+                            <strong>현재 담당 중인 미해결 이슈:</strong>{" "}
+                            {recommendation.currentOpenAssignedIssueCount}
+                          </p>
+                        </div>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p>추천 가능한 담당자가 없습니다.</p>
+            )}
+          </div>
+        )}
 
         <label className="detail-form-field">
           <span>담당자 선택</span>
@@ -121,7 +129,7 @@ function AssignIssueModal({
           </select>
         </label>
 
-        {selectedAssigneeId && (
+        {selectedAssigneeId && showRecommendations && (
           <div className="selected-assignee-explanation">
             <h4>선택된 담당자 설명</h4>
 
