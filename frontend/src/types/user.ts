@@ -10,3 +10,14 @@ export interface User {
 export interface LoginRequest {
   userId: number;
 }
+
+export interface PasswordLoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface UserCreateRequest {
+  username: string;
+  password: string;
+  role: AccountRole;
+}
