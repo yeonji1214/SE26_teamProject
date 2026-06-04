@@ -142,7 +142,7 @@ function ProjectPage() {
         />
       )}
 
-      {isAdmin && <ProjectForm onSubmit={handleCreateProject} />}``
+      {isAdmin && <ProjectForm onSubmit={handleCreateProject} />}
     </section>
   );
 }
