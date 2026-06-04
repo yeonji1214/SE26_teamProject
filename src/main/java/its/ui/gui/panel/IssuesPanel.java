@@ -340,9 +340,7 @@ public class IssuesPanel extends BasePanel {
 
         if (userService != null) {
             for (its.domain.user.User user : userService.getAllUsers()) {
-                if (user.hasRole(Role.TESTER)) {
-                    reporterComboBox.addItem(user);
-                }
+                reporterComboBox.addItem(user);
 
                 if (user.hasRole(Role.DEV)) {
                     assigneeComboBox.addItem(user);
