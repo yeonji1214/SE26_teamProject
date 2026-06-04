@@ -58,6 +58,8 @@ public class CreateIssuePanel extends BasePanel {
 
         saveButton.addActionListener(e -> {
             if (listener != null) {
+                commitComposition();
+
                 Project project = (Project) projectComboBox.getSelectedItem();
                 Long projectId = project.getId();
                 String title = titleTextField.getText();

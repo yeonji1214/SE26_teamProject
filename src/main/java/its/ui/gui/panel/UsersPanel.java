@@ -248,6 +248,8 @@ public class UsersPanel extends BasePanel {
     }
 
     private void handleCreateUser() {
+        commitComposition();
+
         if (!isAdmin) {
             JOptionPane.showMessageDialog(this, "Only admin can create users", "권한 없음", JOptionPane.WARNING_MESSAGE);
             return;

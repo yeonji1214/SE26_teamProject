@@ -124,6 +124,8 @@ public class IssueDetailPanel extends BasePanel {
 
         statusChangeButton.addActionListener(e -> {
             if (listener != null) {
+                commitComposition();
+
                 IssueStatus selected = (IssueStatus) statusComboBox.getSelectedItem();
                 String comment = commentTextArea.getText();
                 Long assigneeId = null;

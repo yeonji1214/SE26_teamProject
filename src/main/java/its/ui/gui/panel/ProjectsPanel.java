@@ -244,6 +244,8 @@ public class ProjectsPanel extends BasePanel {
     }
 
     private void handleCreateProject() {
+        commitComposition();
+
         if (!isAdmin) {
             JOptionPane.showMessageDialog(this, "Only admin can create projects", "권한 없음", JOptionPane.WARNING_MESSAGE);
             return;

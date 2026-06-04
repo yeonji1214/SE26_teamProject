@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.im.InputContext;
 
 public abstract class BasePanel extends JPanel {
     public BasePanel() {
@@ -143,6 +144,22 @@ public abstract class BasePanel extends JPanel {
 
         container.setFocusTraversalPolicy(policy);
         container.setFocusTraversalPolicyProvider(true);
+    }
+
+    /*
+    Hook: 한글 IME 조합이 확정되지 않은 채로 모달/화면 전환이 일어나면
+    입력 컨텍스트가 남아 이후 클릭이 먹히지 않는 문제가 있어,
+    저장·실행 동작 직전에 현재 포커스 컴포넌트의 조합을 강제로 확정한다.
+    */
+    protected void commitComposition() {
+        Component fo = KeyboardFocusManager
+                .getCurrentKeyboardFocusManager().getFocusOwner();
+        if (fo instanceof JComponent) {
+            InputContext ic = fo.getInputContext();
+            if (ic != null) {
+                ic.endComposition();
+            }
+        }
     }
 
     /*
