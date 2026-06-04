@@ -3,7 +3,6 @@ import type {
   Issue,
   IssueCreateRequest,
   IssueSearchCondition,
-  IssueStatus,
   IssueStatusUpdateRequest,
 } from "../types/issue";
 import { getCurrentUser } from "../utils/authStorage";
@@ -102,47 +101,36 @@ function normalizeStatusUpdateRequest(
   issue: Issue,
   request: IssueStatusUpdateRequest
 ): IssueStatusUpdateRequest {
-  const actorId = request.actorId ?? inferActorId(issue, request.status);
+  const actorId = request.actorId ?? inferActorId();
+
   const normalized: IssueStatusUpdateRequest = {
     ...request,
     actorId,
   };
 
   if (request.status === "ASSIGNED") {
-    normalized.assigneeId =
-      request.assigneeId ?? issue.assignee?.id ?? defaultDeveloperId();
+    const assigneeId = request.assigneeId ?? issue.assignee?.id;
+
+    if (!assigneeId) {
+      throw new Error("담당자를 선택하세요.");
+    }
+
+    normalized.assigneeId = assigneeId;
   }
 
   if (request.status === "FIXED") {
-    normalized.fixerId =
-      request.fixerId ?? request.actorId ?? issue.assignee?.id ?? actorId;
+    normalized.fixerId = request.fixerId ?? actorId;
   }
 
   return normalized;
 }
 
-function inferActorId(issue: Issue, status: IssueStatus): number {
+function inferActorId(): number {
   const currentUser = getCurrentUser();
 
-  if (currentUser) {
-    return currentUser.id;
+  if (!currentUser) {
+    throw new Error("로그인 정보가 없습니다. 다시 로그인해주세요.");
   }
 
-  if (status === "FIXED") {
-    return issue.assignee?.id ?? defaultDeveloperId();
-  }
-
-  if (status === "RESOLVED") {
-    return issue.reporter.id;
-  }
-
-  return defaultProjectLeaderId();
-}
-
-function defaultProjectLeaderId(): number {
-  return 2;
-}
-
-function defaultDeveloperId(): number {
-  return 4;
+  return currentUser.id;
 }

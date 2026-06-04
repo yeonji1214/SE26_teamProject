@@ -41,19 +41,39 @@ function getAllowedStatuses(
   }
 
   if (role === "PL") {
-    if (currentStatus === "NEW") return ["ASSIGNED"];
-    if (currentStatus === "RESOLVED") return ["CLOSED"];
-    return ["ASSIGNED", "CLOSED", "REOPENED"];
+    if (currentStatus === "NEW" || currentStatus === "REOPENED") {
+      return ["ASSIGNED"];
+    }
+
+    if (currentStatus === "RESOLVED") {
+      return ["CLOSED", "REOPENED"];
+    }
+
+    if (currentStatus === "CLOSED") {
+      return ["REOPENED"];
+    }
+
+    return [];
   }
 
   if (role === "DEV") {
-    if (currentStatus === "ASSIGNED") return ["FIXED"];
-    return ["FIXED"];
+    if (currentStatus === "ASSIGNED") {
+      return ["FIXED"];
+    }
+
+    return [];
   }
 
   if (role === "TESTER") {
-    if (currentStatus === "FIXED") return ["RESOLVED"];
-    return ["RESOLVED", "REOPENED"];
+    if (currentStatus === "FIXED") {
+      return ["RESOLVED"];
+    }
+
+    if (currentStatus === "RESOLVED" || currentStatus === "CLOSED") {
+      return ["REOPENED"];
+    }
+
+    return [];
   }
 
   return [];
@@ -403,14 +423,22 @@ function IssueDetailPage() {
             )}
 
             {canChangeStatus && (
-              <button
-                type="button"
-                className="secondary-button full-width-button"
-                onClick={openStatusModal}
-                disabled={allowedStatuses.length === 0}
-              >
-                상태 변경
-              </button>
+              <>
+                <button
+                  type="button"
+                  className="secondary-button full-width-button"
+                  onClick={openStatusModal}
+                  disabled={allowedStatuses.length === 0}
+                >
+                  상태 변경
+                </button>
+
+                {allowedStatuses.length === 0 && (
+                  <p className="modal-help-text">
+                    현재 역할에서는 이 상태에서 수행할 수 있는 상태 변경이 없습니다.
+                  </p>
+                )}
+              </>
             )}
 
             {canAssignIssue && (
