@@ -4,9 +4,12 @@ import its.domain.issue.Issue;
 import its.domain.issue.IssueStatus;
 import its.domain.issue.Priority;
 import its.domain.project.Project;
+import its.domain.user.Role;
+import its.domain.user.User;
 import its.service.IssueSearchCriteria;
 import its.service.IssueService;
 import its.service.ProjectService;
+import its.service.UserService;
 import its.ui.gui.common.PlaceholderTextField;
 import its.ui.gui.common.UIConstants;
 
@@ -21,11 +24,11 @@ import java.util.List;
 import static its.ui.gui.common.UIConstants.ButtonType.PRIMARY;
 
 public class IssuesPanel extends BasePanel {
-    private JComboBox<String> projectComboBox;
-    private JComboBox<String> statusComboBox;
-    private PlaceholderTextField reporterField;
-    private PlaceholderTextField assigneeField;
-    private JComboBox<String> priorityComboBox;
+    private JComboBox<Object> projectComboBox;
+    private JComboBox<Object> statusComboBox;
+    private JComboBox<Object> reporterComboBox;
+    private JComboBox<Object> assigneeComboBox;
+    private JComboBox<Object> priorityComboBox;
     private PlaceholderTextField titleSearchField;
 
     private JButton searchButton;
@@ -39,15 +42,19 @@ public class IssuesPanel extends BasePanel {
 
     private IssueService issueService;
     private ProjectService projectService;
+    private UserService userService;
 
     private static final String[] COLUMN_NAMES = {
             "ID", "제목", "상태", "우선순위", "리포터", "담당자", "등록일"
     };
 
-    public void setServices(IssueService issueService, ProjectService projectService) {
+    public void setServices(IssueService issueService, ProjectService projectService, UserService userService) {
         this.issueService = issueService;
         this.projectService = projectService;
+        this.userService = userService;
+
         refreshProjectComboBox();
+        refreshUserComboBoxes();
         refreshIssues();
     }
 
@@ -59,14 +66,10 @@ public class IssuesPanel extends BasePanel {
     @Override
     protected void initComponents() {
         projectComboBox = new JComboBox<>();
-        statusComboBox = new JComboBox<>(new String[]{
-                "전체", "NEW", "ASSIGNED", "FIXED", "RESOLVED", "CLOSED", "REOPENED"
-        });
-        reporterField = new PlaceholderTextField("tester1");
-        assigneeField = new PlaceholderTextField("dev1");
-        priorityComboBox = new JComboBox<>(new String[]{
-                "전체", "BLOCKER", "CRITICAL", "MAJOR", "MINOR", "TRIVIAL"
-        });
+        statusComboBox = new JComboBox<>();
+        reporterComboBox = new JComboBox<>();
+        assigneeComboBox = new JComboBox<>();
+        priorityComboBox = new JComboBox<>();
 
         GridBagConstraints gbc = new GridBagConstraints();
 
@@ -146,10 +149,49 @@ public class IssuesPanel extends BasePanel {
     private JPanel createFilterPanel() {
         JPanel panel = new JPanel(new GridLayout(1, 5));
 
+        projectComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Project project) {
+                    setText(project.getName());
+                } else if (value != null) {
+                    setText(value.toString());
+                }
+                return this;
+            }
+        });
+
+        statusComboBox.addItem("전체");
+        for (IssueStatus status: IssueStatus.values()) {
+            statusComboBox.addItem(status);
+        }
+
+        DefaultListCellRenderer userRenderer = new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof its.domain.user.User user) {
+                    setText(user.getUsername());
+                } else if (value != null) {
+                    setText(value.toString());
+                }
+                return this;
+            }
+        };
+
+        reporterComboBox.setRenderer(userRenderer);
+        assigneeComboBox.setRenderer(userRenderer);
+
+        priorityComboBox.addItem("전체");
+        for (Priority priority: Priority.values()) {
+            priorityComboBox.addItem(priority);
+        }
+
         panel.add(createFilterCell("프로젝트", projectComboBox));
         panel.add(createFilterCell("상태", statusComboBox));
-        panel.add(createFilterCell("리포터", reporterField));
-        panel.add(createFilterCell("담당자", assigneeField));
+        panel.add(createFilterCell("리포터", reporterComboBox));
+        panel.add(createFilterCell("담당자", assigneeComboBox));
         panel.add(createFilterCell("우선순위", priorityComboBox));
 
         return panel;
@@ -275,7 +317,7 @@ public class IssuesPanel extends BasePanel {
 
         if (projectService != null) {
             for (Project project : projectService.getAllProjects()) {
-                projectComboBox.addItem(project.getName());
+                projectComboBox.addItem(project);
             }
         }
 
@@ -284,29 +326,43 @@ public class IssuesPanel extends BasePanel {
         }
     }
 
+    private void refreshUserComboBoxes() {
+        if (reporterComboBox == null || assigneeComboBox == null) return;
+
+        Object selectedReporter = reporterComboBox.getSelectedItem();
+        Object selectedAssignee = assigneeComboBox.getSelectedItem();
+
+        reporterComboBox.removeAllItems();
+        assigneeComboBox.removeAllItems();
+
+        reporterComboBox.addItem("전체");
+        assigneeComboBox.addItem("전체");
+
+        if (userService != null) {
+            for (its.domain.user.User user : userService.getAllUsers()) {
+                reporterComboBox.addItem(user);
+
+                if (user.hasRole(Role.DEV)) {
+                    assigneeComboBox.addItem(user);
+                }
+            }
+        }
+
+        if (selectedReporter != null) reporterComboBox.setSelectedItem(selectedReporter);
+        if (selectedAssignee != null) assigneeComboBox.setSelectedItem(selectedAssignee);
+    }
+
     public void refreshIssues() {
-        if (tableModel == null) {
+        if (tableModel == null || issueService == null) {
             return;
         }
 
         tableModel.setRowCount(0);
 
-        if (issueService == null) {
-            return;
-        }
-
         IssueSearchCriteria criteria = buildCriteria();
         List<Issue> issues = issueService.searchIssues(criteria);
 
         for (Issue issue : issues) {
-            if (!matchesReporter(issue)) {
-                continue;
-            }
-
-            if (!matchesAssignee(issue)) {
-                continue;
-            }
-
             addIssue(issue);
         }
     }
@@ -314,22 +370,29 @@ public class IssuesPanel extends BasePanel {
     private IssueSearchCriteria buildCriteria() {
         IssueSearchCriteria criteria = new IssueSearchCriteria();
 
-        String selectedProject = (String) projectComboBox.getSelectedItem();
-        if (selectedProject != null && !"전체".equals(selectedProject) && projectService != null) {
-            projectService.getAllProjects().stream()
-                    .filter(project -> project.getName().equals(selectedProject))
-                    .findFirst()
-                    .ifPresent(project -> criteria.setProjectId(project.getId()));
+        Object selectedProject = projectComboBox.getSelectedItem();
+        if (selectedProject instanceof Project project) {
+            criteria.setProjectId(project.getId());
         }
 
-        String selectedStatus = (String) statusComboBox.getSelectedItem();
-        if (selectedStatus != null && !"전체".equals(selectedStatus)) {
-            criteria.setStatus(IssueStatus.valueOf(selectedStatus));
+        Object selectedStatus = statusComboBox.getSelectedItem();
+        if (selectedStatus instanceof IssueStatus status) {
+            criteria.setStatus(status);
         }
 
-        String selectedPriority = (String) priorityComboBox.getSelectedItem();
-        if (selectedPriority != null && !"전체".equals(selectedPriority)) {
-            criteria.setPriority(Priority.valueOf(selectedPriority));
+        Object selectedReporter = reporterComboBox.getSelectedItem();
+        if (selectedReporter instanceof User reporter){
+            criteria.setReporterId(reporter.getId());
+        }
+
+        Object selectedAssignee = assigneeComboBox.getSelectedItem();
+        if (selectedAssignee instanceof User assignee){
+            criteria.setAssigneeId(assignee.getId());
+        }
+
+        Object selectedPriority = priorityComboBox.getSelectedItem();
+        if (selectedPriority instanceof Priority priority) {
+            criteria.setPriority(priority);
         }
 
         String keyword = titleSearchField.getText();
@@ -338,30 +401,6 @@ public class IssuesPanel extends BasePanel {
         }
 
         return criteria;
-    }
-
-    private boolean matchesReporter(Issue issue) {
-        String filter = reporterField.getText();
-
-        if (filter == null || filter.isBlank()) {
-            return true;
-        }
-
-        return issue.getReporter().getUsername().toLowerCase().contains(filter.toLowerCase());
-    }
-
-    private boolean matchesAssignee(Issue issue) {
-        String filter = assigneeField.getText();
-
-        if (filter == null || filter.isBlank()) {
-            return true;
-        }
-
-        if (issue.getAssignee() == null) {
-            return false;
-        }
-
-        return issue.getAssignee().getUsername().toLowerCase().contains(filter.toLowerCase());
     }
 
     private void addIssue(Issue issue) {
@@ -395,10 +434,10 @@ public class IssuesPanel extends BasePanel {
             projectComboBox.setSelectedIndex(0);
         }
 
-        statusComboBox.setSelectedIndex(0);
-        priorityComboBox.setSelectedIndex(0);
-        reporterField.setText("");
-        assigneeField.setText("");
+        if (statusComboBox.getItemCount() > 0) statusComboBox.setSelectedIndex(0);
+        if (priorityComboBox.getItemCount() > 0) priorityComboBox.setSelectedIndex(0);
+        if (reporterComboBox.getItemCount() > 0) reporterComboBox.setSelectedIndex(0);
+        if (assigneeComboBox.getItemCount() > 0) assigneeComboBox.setSelectedIndex(0);
         titleSearchField.setText("");
         issueTable.clearSelection();
 
@@ -410,6 +449,7 @@ public class IssuesPanel extends BasePanel {
     @Override
     public void onActivate() {
         refreshProjectComboBox();
+        refreshUserComboBoxes();
         refreshIssues();
         issueTable.clearSelection();
     }
