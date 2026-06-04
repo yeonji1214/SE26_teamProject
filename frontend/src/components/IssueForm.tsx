@@ -3,8 +3,10 @@ import { getProjects } from "../api/projectApi";
 import type { IssueCreateRequest, IssuePriority } from "../types/issue";
 import type { Project } from "../types/project";
 
+type IssueFormRequest = Omit<IssueCreateRequest, "reporterId">;
+
 interface IssueFormProps {
-  onSubmit: (request: IssueCreateRequest) => void;
+  onSubmit: (request: IssueFormRequest) => void;
   onCancel: () => void;
 }
 
@@ -57,7 +59,6 @@ function IssueForm({ onSubmit, onCancel }: IssueFormProps) {
       title: title.trim(),
       description: description.trim(),
       priority,
-      reporterId: 6,
     });
   };
 
