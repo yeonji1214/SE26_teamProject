@@ -141,7 +141,7 @@ public class MainFrame extends JFrame {
         projectsPanel.setProjectService(services.getProjectService());
 
         IssuesPanel issuesPanel = new IssuesPanel();
-        issuesPanel.setServices(services.getIssueService(), services.getProjectService());
+        issuesPanel.setServices(services.getIssueService(), services.getProjectService(), services.getUserService());
 
         CreateIssuePanel createIssuePanel = new CreateIssuePanel();
         createIssuePanel.setProjectService(services.getProjectService());
@@ -203,8 +203,8 @@ public class MainFrame extends JFrame {
             }
 
             @Override
-            public void onSaveRequested(String project, String title, String description, Priority priority) {
-                handleCreateIssue(project, title, description, priority, issuesPanel, createIssuePanel, statisticsPanel);
+            public void onSaveRequested(Long projectId, String title, String description, Priority priority) {
+                handleCreateIssue(projectId, title, description, priority, issuesPanel, createIssuePanel, statisticsPanel);
             }
         });
 
@@ -241,7 +241,7 @@ public class MainFrame extends JFrame {
     }
 
     private void handleCreateIssue(
-            String projectName,
+            Long projectId,
             String title,
             String description,
             Priority priority,
@@ -254,12 +254,10 @@ public class MainFrame extends JFrame {
                 throw new IllegalStateException("current user is not set");
             }
 
-            validateIssueForm(projectName, title, description);
-
-            Project project = findProjectByName(projectName);
+            validateIssueForm(projectId, title, description);
 
             Issue created = services.getIssueService().createIssue(
-                    project.getId(),
+                    projectId,
                     title.trim(),
                     description.trim(),
                     currentUser.getId(),
@@ -357,23 +355,8 @@ public class MainFrame extends JFrame {
         }
     }
 
-    private Long selectAssigneeId(Long issueId) {
-        List<AssigneeRecommendation> recommendations =
-                services.getRecommendationService().recommendAssignees(issueId, 1);
-
-        if (!recommendations.isEmpty()) {
-            return recommendations.get(0).getAssignee().getId();
-        }
-
-        return services.getUserService().getAllUsers().stream()
-                .filter(user -> user.hasRole(Role.DEV))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("no DEV user exists"))
-                .getId();
-    }
-
-    private void validateIssueForm(String projectName, String title, String description) {
-        if (projectName == null || projectName.isBlank()) {
+    private void validateIssueForm(Long projectId, String title, String description) {
+        if (projectId == null) {
             throw new IllegalArgumentException("project must be selected");
         }
 
@@ -384,13 +367,6 @@ public class MainFrame extends JFrame {
         if (description == null || description.isBlank()) {
             throw new IllegalArgumentException("description must not be blank");
         }
-    }
-
-    private Project findProjectByName(String projectName) {
-        return services.getProjectService().getAllProjects().stream()
-                .filter(project -> project.getName().equals(projectName))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("project not found: " + projectName));
     }
 
     private void handleLogout() {

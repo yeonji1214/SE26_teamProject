@@ -10,7 +10,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class CreateIssuePanel extends BasePanel {
-    private JComboBox<String> projectComboBox;
+    private JComboBox<Project> projectComboBox;
     private PlaceholderTextField titleTextField;
     private JTextArea descriptionTextArea;
     private JComboBox<Priority> priorityComboBox;
@@ -58,12 +58,13 @@ public class CreateIssuePanel extends BasePanel {
 
         saveButton.addActionListener(e -> {
             if (listener != null) {
-                String project = (String) projectComboBox.getSelectedItem();
+                Project project = (Project) projectComboBox.getSelectedItem();
+                Long projectId = project.getId();
                 String title = titleTextField.getText();
                 String description = descriptionTextArea.getText();
                 Priority priority = (Priority) priorityComboBox.getSelectedItem();
 
-                listener.onSaveRequested(project, title, description, priority);
+                listener.onSaveRequested(projectId, title, description, priority);
             }
         });
     }
@@ -89,6 +90,16 @@ public class CreateIssuePanel extends BasePanel {
         gbc.gridy = 1;
         panel.add(projectLabel, gbc);
 
+        projectComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Project project) {
+                    setText(project.getName());
+                }
+                return this;
+            }
+        });
         gbc.gridy = 2;
         panel.add(projectComboBox, gbc);
 
@@ -192,7 +203,7 @@ public class CreateIssuePanel extends BasePanel {
 
         if (projectService != null) {
             for (Project project : projectService.getAllProjects()) {
-                projectComboBox.addItem(project.getName());
+                projectComboBox.addItem(project);
             }
         }
 
@@ -206,7 +217,7 @@ public class CreateIssuePanel extends BasePanel {
     }
 
     public interface CreateIssueActionListener {
-        void onSaveRequested(String project, String title, String description, Priority priority);
+        void onSaveRequested(Long projectId, String title, String description, Priority priority);
 
         void onCancelRequested();
     }
